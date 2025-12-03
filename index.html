@@ -124,8 +124,8 @@
     <!-- Video Intro Overlay -->
     <div id="video-overlay">
         <div id="video-container">
-            <!-- RUTA ACTUALIZADA A intro.mp4 -->
-            <video id="intro-video" muted playsinline>
+            <!-- RUTA ACTUALIZADA A intro.mp4, AÑADIDO poster y preload -->
+            <video id="intro-video" muted playsinline preload="auto" poster="logo.png">
                 <source src="intro.mp4" type="video/mp4">
                 Tu navegador no soporta la etiqueta de video.
             </video>
@@ -442,6 +442,16 @@
             }, 1000); // Debe coincidir con la duración de la transición CSS
         };
         
+        const handleAutoPlayFailure = () => {
+            const video = document.getElementById('intro-video');
+            const skipBtn = document.getElementById('skip-intro-btn'); 
+            
+            console.warn("Auto-reproducción bloqueada o falló la carga. Mostrando botón de inicio.");
+            skipBtn.classList.remove('hidden'); // Mostrar el botón
+            // Atenuar el video/póster si es visible, para que el botón destaque
+            video.style.opacity = 0.5; 
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const video = document.getElementById('intro-video');
             const skipBtn = document.getElementById('skip-intro-btn'); 
@@ -456,10 +466,11 @@
                 video.onended = dismissOverlay;
             }).catch(error => {
                 // 2. Falló la reproducción automática: mostrar el botón de inicio
-                console.warn("Auto-reproducción bloqueada. Mostrando botón de inicio.");
-                skipBtn.classList.remove('hidden'); // Mostrar el botón
-                video.style.opacity = 0.5; // Atenuar el video para que el botón destaque
+                handleAutoPlayFailure();
             });
+
+            // 3. Manejar error de carga (si el archivo no existe o el códec es inválido)
+            video.addEventListener('error', handleAutoPlayFailure);
         });
     </script>
 </body>
