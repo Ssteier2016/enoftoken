@@ -1,16 +1,1576 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zombie Survival Arena</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; }
-        #root { height: 100vh; overflow: hidden; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #dc2626;
+            --secondary: #1e293b;
+            --accent: #fbbf24;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Pantalla de carga */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-container {
+            text-align: center;
+        }
+
+        .loading-logo {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: pulse 2s infinite;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 50px rgba(220, 38, 38, 0.5);
+        }
+
+        .loading-logo h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem auto;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .loading-text {
+            color: #94a3b8;
+            margin-top: 1rem;
+        }
+
+        /* Menú principal */
+        #main-menu, #game-screen, #editor-screen, #character-select {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .screen-active {
+            display: block !important;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .game-title {
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(220, 38, 38, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .menu-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .menu-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(220, 38, 38, 0.2);
+        }
+
+        .menu-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+        }
+
+        .menu-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .menu-card p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* Selector de personajes */
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .character-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .character-card:hover, .character-card.selected {
+            border-color: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
+        }
+
+        .character-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #475569, #1e293b);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .character-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* Controles */
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .control-btn {
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            margin: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .control-btn:active {
+            transform: scale(0.9);
+            background: var(--primary);
+        }
+
+        .control-center {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            grid-template-rows: repeat(3, 70px);
+            gap: 10px;
+        }
+
+        /* HUD del juego */
+        .hud {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hud-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hud-icon {
+            font-size: 1.5rem;
+        }
+
+        .hud-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Tablero de juego */
+        .game-board {
+            display: grid;
+            gap: 2px;
+            margin: 2rem auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 100%;
+            overflow: auto;
+        }
+
+        .game-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .game-cell {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        /* Colores de las celdas */
+        .cell-empty { background: #1e293b; }
+        .cell-wall { background: #92400e; background-image: linear-gradient(45deg, #92400e 25%, #b45309 25%, #b45309 50%, #92400e 50%, #92400e 75%, #b45309 75%, #b45309 100%); background-size: 20px 20px; }
+        .cell-zombie { background: #7f1d1d; }
+        .cell-rock { background: #475569; background-image: linear-gradient(45deg, #475569 25%, #64748b 25%, #64748b 50%, #475569 50%, #475569 75%, #64748b 75%, #64748b 100%); background-size: 20px 20px; }
+        .cell-box { background: #854d0e; }
+        .cell-grass { background: #166534; }
+        .cell-water { background: #1d4ed8; }
+        .cell-rifle { background: #374151; }
+        .cell-shotgun { background: #525252; }
+        .cell-key { background: #ca8a04; }
+        .cell-portal { background: #7c3aed; }
+        .cell-start { background: #059669; }
+        .cell-exit { background: #dc2626; }
+
+        .player {
+            background: #3b82f6;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 10px #3b82f6;
+            animation: pulse 1.5s infinite;
+        }
+
+        .zombie {
+            background: #7f1d1d;
+            border-radius: 4px;
+            border: 2px solid #fca5a5;
+            animation: zombie-move 2s infinite alternate;
+        }
+
+        /* Editor */
+        .editor-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .tool-btn {
+            padding: 1rem 1.5rem;
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+        }
+
+        .tool-btn:hover, .tool-btn.active {
+            border-color: var(--primary);
+            background: rgba(220, 38, 38, 0.2);
+        }
+
+        .tool-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Mensajes */
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            padding: 2rem 3rem;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 50px rgba(220, 38, 38, 0.5);
+            animation: pop-in 0.3s ease;
+            min-width: 300px;
+        }
+
+        .message h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .message p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #cbd5e1;
+        }
+
+        .message-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .message-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        /* Botones de acción */
+        .action-buttons {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            background: rgba(220, 38, 38, 0.3);
+        }
+
+        /* Niveles */
+        .levels-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .level-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .level-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .level-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .level-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .level-btn-edit {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .level-btn-play {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .level-btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .level-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Animaciones */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes zombie-move {
+            0% { transform: translateX(-2px); }
+            100% { transform: translateX(2px); }
+        }
+
+        @keyframes pop-in {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        @keyframes slide-up {
+            0% { transform: translateY(100px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Utilidades */
+        .hidden {
+            display: none !important;
+        }
+
+        .visible {
+            display: block !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 2rem; }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <!-- Pantalla de carga -->
+    <div id="loading-screen" class="screen-active">
+        <div class="loading-container">
+            <div class="loading-logo">
+                <h1>ZA</h1>
+            </div>
+            <h2>ZOMBIE APOCALYPSE</h2>
+            <div class="loading-bar">
+                <div id="loading-progress" class="loading-progress" style="width: 0%"></div>
+            </div>
+            <p id="loading-text" class="loading-text">Iniciando supervivencia...</p>
+        </div>
+    </div>
+
+    <!-- Menú principal -->
+    <div id="main-menu" class="container">
+        <div class="header">
+            <h1 class="game-title">ZOMBIE SURVIVOR</h1>
+            <p class="subtitle">Construye. Sobrevive. Sobrevive.</p>
+        </div>
+
+        <div class="menu-options">
+            <div class="menu-card" onclick="showScreen('character-select')">
+                <div class="menu-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h2>Modo Jugador</h2>
+                <p>Sobrevive a los niveles creados. ¡Elige tu personaje y lucha por tu vida!</p>
+            </div>
+
+            <div class="menu-card" onclick="showScreen('editor-screen')">
+                <div class="menu-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h2>Modo Cerebro</h2>
+                <p>Diseña tus propios escenarios de supervivencia con bloques. Crea desafíos mortales.</p>
+            </div>
+
+            <div class="menu-card" onclick="showLevels()">
+                <div class="menu-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <h2>Niveles Guardados</h2>
+                <p>Gestiona y juega tus niveles creados. ¡Personaliza tu experiencia!</p>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <p class="subtitle">¿Listo para enfrentar el apocalipsis?</p>
+        </div>
+    </div>
+
+    <!-- Selector de personajes -->
+    <div id="character-select" class="container">
+        <div class="header">
+            <h1 class="game-title">ELIGE TU SUPERVIVIENTE</h1>
+            <p class="subtitle">Cada personaje tiene habilidades únicas de supervivencia</p>
+        </div>
+
+        <div class="character-grid" id="characters-container">
+            <!-- Los personajes se cargarán aquí -->
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-secondary mb-2" onclick="showScreen('main-menu')">
+                <i class="fas fa-arrow-left"></i> Volver al Menú
+            </button>
+            <p class="subtitle">Selecciona un personaje para comenzar la aventura</p>
+        </div>
+    </div>
+
+    <!-- Editor de niveles -->
+    <div id="editor-screen">
+        <div class="hud">
+            <div class="hud-section">
+                <div class="hud-item">
+                    <i class="fas fa-brain hud-icon" style="color: #8b5cf6;"></i>
+                    <span>Modo Cerebro</span>
+                </div>
+                <div id="editor-level-name" class="hud-item">
+                    <i class="fas fa-map hud-icon" style="color: #10b981;"></i>
+                    <span>Nuevo Nivel</span>
+                </div>
+            </div>
+            <div class="hud-section">
+                <div class="hud-item">
+                    <i class="fas fa-ruler-combined hud-icon" style="color: #f59e0b;"></i>
+                    <span id="editor-size">10x10</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" onclick="saveLevel()">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+            <button class="action-btn" onclick="showScreen('main-menu')">
+                <i class="fas fa-home"></i> Menú
+            </button>
+        </div>
+
+        <div class="container" style="margin-top: 120px;">
+            <div class="editor-tools" id="editor-tools">
+                <!-- Las herramientas se cargarán aquí -->
+            </div>
+
+            <div class="game-board" id="editor-board">
+                <!-- El tablero del editor se generará aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de juego -->
+    <div id="game-screen">
+        <div class="hud">
+            <div class="hud-section">
+                <div class="hud-item">
+                    <i class="fas fa-heart hud-icon" style="color: #ef4444;"></i>
+                    <span id="lives" class="hud-value">3</span>
+                </div>
+                <div class="hud-item">
+                    <i class="fas fa-clock hud-icon" style="color: #f59e0b;"></i>
+                    <span id="time" class="hud-value">60</span>
+                </div>
+                <div class="hud-item">
+                    <i class="fas fa-user hud-icon" style="color: #3b82f6;"></i>
+                    <span id="character-name" class="hud-value">Civil</span>
+                </div>
+            </div>
+            <div class="hud-section">
+                <div class="hud-item">
+                    <i class="fas fa-gun hud-icon" style="color: #94a3b8;"></i>
+                    <span id="ammo" class="hud-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <i class="fas fa-key hud-icon" style="color: #eab308;"></i>
+                    <span id="keys" class="hud-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <i class="fas fa-skull hud-icon" style="color: #dc2626;"></i>
+                    <span id="zombies-count" class="hud-value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" onclick="showScreen('main-menu')">
+                <i class="fas fa-home"></i> Salir
+            </button>
+        </div>
+
+        <div class="container" style="margin-top: 120px; display: flex; justify-content: center;">
+            <div class="game-board" id="game-board">
+                <!-- El tablero de juego se generará aquí -->
+            </div>
+        </div>
+
+        <!-- Controles móviles -->
+        <div class="controls">
+            <div class="control-center">
+                <div></div>
+                <button class="control-btn" onclick="movePlayer(0, -1)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <div></div>
+                <button class="control-btn" onclick="movePlayer(-1, 0)">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button class="control-btn" onclick="attack()" style="background: var(--danger);">
+                    <i class="fas fa-burst"></i>
+                </button>
+                <button class="control-btn" onclick="movePlayer(1, 0)">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <div></div>
+                <button class="control-btn" onclick="movePlayer(0, 1)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes y modales -->
+    <div id="message-modal" class="message hidden">
+        <h2 id="message-title">¡Victoria!</h2>
+        <p id="message-text">Has completado el nivel con éxito.</p>
+        <button id="message-button" class="message-btn" onclick="hideMessage()">Continuar</button>
+    </div>
+
+    <div id="levels-modal" class="message hidden">
+        <h2>Niveles Guardados</h2>
+        <div id="levels-list" class="levels-list">
+            <!-- Los niveles se cargarán aquí -->
+        </div>
+        <div class="text-center mt-3">
+            <button class="btn btn-secondary" onclick="hideMessage()">
+                <i class="fas fa-times"></i> Cerrar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================
+        // CONFIGURACIÓN Y CONSTANTES
+        // ============================
+        const TILE_TYPES = {
+            EMPTY: 'empty',
+            WALL: 'wall',
+            ZOMBIE: 'zombie',
+            ROCK: 'rock',
+            BOX: 'box',
+            GRASS: 'grass',
+            WATER: 'water',
+            RIFLE: 'rifle',
+            SHOTGUN: 'shotgun',
+            KEY: 'key',
+            PORTAL: 'portal',
+            START: 'start',
+            EXIT: 'exit'
+        };
+
+        const TILE_CONFIG = {
+            [TILE_TYPES.EMPTY]: { name: 'Vacío', color: 'cell-empty', icon: '', class: 'cell-empty' },
+            [TILE_TYPES.WALL]: { name: 'Ladrillo', color: 'cell-wall', icon: '🧱', class: 'cell-wall' },
+            [TILE_TYPES.ZOMBIE]: { name: 'Zombie', color: 'cell-zombie', icon: '🧟', class: 'cell-zombie' },
+            [TILE_TYPES.ROCK]: { name: 'Roca', color: 'cell-rock', icon: '🪨', class: 'cell-rock' },
+            [TILE_TYPES.BOX]: { name: 'Caja', color: 'cell-box', icon: '📦', class: 'cell-box' },
+            [TILE_TYPES.GRASS]: { name: 'Pastizal', color: 'cell-grass', icon: '🌿', class: 'cell-grass' },
+            [TILE_TYPES.WATER]: { name: 'Agua', color: 'cell-water', icon: '💧', class: 'cell-water' },
+            [TILE_TYPES.RIFLE]: { name: 'Rifle', color: 'cell-rifle', icon: '🔫', class: 'cell-rifle' },
+            [TILE_TYPES.SHOTGUN]: { name: 'Shotgun', color: 'cell-shotgun', icon: '💥', class: 'cell-shotgun' },
+            [TILE_TYPES.KEY]: { name: 'Llave', color: 'cell-key', icon: '🔑', class: 'cell-key' },
+            [TILE_TYPES.PORTAL]: { name: 'Portal', color: 'cell-portal', icon: '🌀', class: 'cell-portal' },
+            [TILE_TYPES.START]: { name: 'Entrada', color: 'cell-start', icon: '🏠', class: 'cell-start' },
+            [TILE_TYPES.EXIT]: { name: 'Salida', color: 'cell-exit', icon: '🚪', class: 'cell-exit' }
+        };
+
+        const CHARACTERS = [
+            { id: 'civil', name: 'Civil', icon: '👨‍💼', health: 100, speed: 1.0, damage: 10, description: 'Ciudadano común con instinto de supervivencia' },
+            { id: 'rambo', name: 'Rambo', icon: '💪', health: 150, speed: 0.8, damage: 25, description: 'Experto en combate y explosivos' },
+            { id: 'ninja', name: 'Ninja', icon: '🥷', health: 80, speed: 1.5, damage: 20, description: 'Ágil y silencioso, maestro del sigilo' },
+            { id: 'samurai', name: 'Samurái', icon: '⚔️', health: 120, speed: 1.0, damage: 30, description: 'Guerrero letal con katana' },
+            { id: 'terminator', name: 'Terminator', icon: '🤖', health: 200, speed: 0.7, damage: 15, description: 'Máquina imparable de combate' }
+        ];
+
+        // ============================
+        // VARIABLES GLOBALES DEL JUEGO
+        // ============================
+        let currentScreen = 'loading';
+        let selectedCharacter = CHARACTERS[0];
+        let currentLevel = null;
+        let gameState = {
+            grid: [],
+            width: 10,
+            height: 10,
+            player: { x: 0, y: 0 },
+            zombies: [],
+            lives: 3,
+            time: 60,
+            ammo: 0,
+            keys: 0,
+            playing: false,
+            levelName: 'Nivel 1'
+        };
+
+        let editorState = {
+            tool: TILE_TYPES.WALL,
+            grid: [],
+            width: 10,
+            height: 10,
+            name: 'Nuevo Nivel',
+            timeLimit: 60
+        };
+
+        let savedLevels = [
+            {
+                name: 'Nivel 1 - El Comienzo',
+                width: 10,
+                height: 10,
+                timeLimit: 60,
+                grid: Array(100).fill(TILE_TYPES.EMPTY)
+            }
+        ];
+
+        // ============================
+        // INICIALIZACIÓN
+        // ============================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simular carga
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(loadingInterval);
+                    setTimeout(() => {
+                        showScreen('main-menu');
+                    }, 500);
+                }
+                document.getElementById('loading-progress').style.width = progress + '%';
+                document.getElementById('loading-text').textContent = 
+                    progress < 30 ? 'Cargando recursos...' :
+                    progress < 60 ? 'Inicializando zombies...' :
+                    progress < 90 ? 'Preparando armas...' :
+                    '¡Listo para sobrevivir!';
+            }, 200);
+
+            // Cargar niveles desde localStorage
+            const saved = localStorage.getItem('zombieLevels');
+            if (saved) {
+                savedLevels = JSON.parse(saved);
+            }
+
+            // Inicializar editor
+            initializeEditor();
+            initializeCharacters();
+
+            // Configurar controles de teclado
+            document.addEventListener('keydown', handleKeyPress);
+        });
+
+        // ============================
+        // MANEJO DE PANTALLAS
+        // ============================
+        function showScreen(screenName) {
+            document.getElementById('loading-screen').classList.remove('screen-active');
+            document.getElementById('main-menu').classList.remove('screen-active');
+            document.getElementById('character-select').classList.remove('screen-active');
+            document.getElementById('editor-screen').classList.remove('screen-active');
+            document.getElementById('game-screen').classList.remove('screen-active');
+
+            currentScreen = screenName;
+
+            switch(screenName) {
+                case 'main-menu':
+                    document.getElementById('main-menu').classList.add('screen-active');
+                    break;
+                case 'character-select':
+                    document.getElementById('character-select').classList.add('screen-active');
+                    break;
+                case 'editor-screen':
+                    document.getElementById('editor-screen').classList.add('screen-active');
+                    loadEditor();
+                    break;
+                case 'game-screen':
+                    document.getElementById('game-screen').classList.add('screen-active');
+                    startGame();
+                    break;
+            }
+
+            hideMessage();
+        }
+
+        // ============================
+        // SELECTOR DE PERSONAJES
+        // ============================
+        function initializeCharacters() {
+            const container = document.getElementById('characters-container');
+            container.innerHTML = '';
+
+            CHARACTERS.forEach(char => {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                if (char.id === selectedCharacter.id) {
+                    card.classList.add('selected');
+                }
+
+                card.innerHTML = `
+                    <div class="character-avatar">
+                        <span style="font-size: 2.5rem;">${char.icon}</span>
+                    </div>
+                    <h3>${char.name}</h3>
+                    <p style="color: #94a3b8; margin: 0.5rem 0; font-size: 0.9rem;">${char.description}</p>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <div class="stat-value">${char.health}</div>
+                            <div class="stat-label">Salud</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${char.speed}</div>
+                            <div class="stat-label">Velocidad</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${char.damage}</div>
+                            <div class="stat-label">Daño</div>
+                        </div>
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedCharacter = char;
+                };
+
+                container.appendChild(card);
+            });
+        }
+
+        // ============================
+        // EDITOR DE NIVELES
+        // ============================
+        function initializeEditor() {
+            // Inicializar grid del editor
+            editorState.grid = Array(editorState.width * editorState.height).fill(TILE_TYPES.EMPTY);
+            
+            // Cargar herramientas
+            const toolsContainer = document.getElementById('editor-tools');
+            toolsContainer.innerHTML = '';
+
+            Object.entries(TILE_CONFIG).forEach(([type, config]) => {
+                const tool = document.createElement('div');
+                tool.className = `tool-btn ${editorState.tool === type ? 'active' : ''}`;
+                tool.innerHTML = `
+                    <div class="tool-color ${config.class}" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                    <span>${config.name}</span>
+                `;
+                tool.onclick = () => {
+                    editorState.tool = type;
+                    document.querySelectorAll('.tool-btn').forEach(t => t.classList.remove('active'));
+                    tool.classList.add('active');
+                };
+                toolsContainer.appendChild(tool);
+            });
+        }
+
+        function loadEditor() {
+            document.getElementById('editor-level-name').innerHTML = `
+                <i class="fas fa-map hud-icon" style="color: #10b981;"></i>
+                <span>${editorState.name}</span>
+            `;
+            document.getElementById('editor-size').textContent = `${editorState.width}x${editorState.height}`;
+            renderEditorGrid();
+        }
+
+        function renderEditorGrid() {
+            const board = document.getElementById('editor-board');
+            board.innerHTML = '';
+            board.style.gridTemplateColumns = `repeat(${editorState.width}, 40px)`;
+
+            for (let y = 0; y < editorState.height; y++) {
+                for (let x = 0; x < editorState.width; x++) {
+                    const index = y * editorState.width + x;
+                    const tileType = editorState.grid[index] || TILE_TYPES.EMPTY;
+                    const config = TILE_CONFIG[tileType];
+
+                    const cell = document.createElement('div');
+                    cell.className = `game-cell ${config.class}`;
+                    cell.textContent = config.icon;
+                    cell.title = config.name;
+
+                    cell.onclick = () => {
+                        // Solo permitir una entrada y una salida
+                        if (editorState.tool === TILE_TYPES.START) {
+                            for (let i = 0; i < editorState.grid.length; i++) {
+                                if (editorState.grid[i] === TILE_TYPES.START) {
+                                    editorState.grid[i] = TILE_TYPES.EMPTY;
+                                }
+                            }
+                        }
+                        if (editorState.tool === TILE_TYPES.EXIT) {
+                            for (let i = 0; i < editorState.grid.length; i++) {
+                                if (editorState.grid[i] === TILE_TYPES.EXIT) {
+                                    editorState.grid[i] = TILE_TYPES.EMPTY;
+                                }
+                            }
+                        }
+
+                        editorState.grid[index] = editorState.tool;
+                        renderEditorGrid();
+                    };
+
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        function saveLevel() {
+            const name = prompt('Nombre del nivel:', editorState.name);
+            if (!name) return;
+
+            editorState.name = name;
+            
+            const newLevel = {
+                name: editorState.name,
+                width: editorState.width,
+                height: editorState.height,
+                timeLimit: editorState.timeLimit,
+                grid: [...editorState.grid]
+            };
+
+            savedLevels.push(newLevel);
+            localStorage.setItem('zombieLevels', JSON.stringify(savedLevels));
+
+            showMessage('¡Nivel Guardado!', `El nivel "${name}" ha sido guardado exitosamente.`);
+        }
+
+        // ============================
+        // LISTA DE NIVELES
+        // ============================
+        function showLevels() {
+            const listContainer = document.getElementById('levels-list');
+            listContainer.innerHTML = '';
+
+            if (savedLevels.length === 0) {
+                listContainer.innerHTML = '<p class="text-center" style="grid-column: 1 / -1; color: #94a3b8;">No hay niveles guardados</p>';
+            } else {
+                savedLevels.forEach((level, index) => {
+                    const levelCard = document.createElement('div');
+                    levelCard.className = 'level-card';
+                    
+                    const zombieCount = level.grid.filter(t => t === TILE_TYPES.ZOMBIE).length;
+                    const itemCount = level.grid.filter(t => [TILE_TYPES.RIFLE, TILE_TYPES.SHOTGUN, TILE_TYPES.KEY].includes(t)).length;
+
+                    levelCard.innerHTML = `
+                        <h3>${level.name}</h3>
+                        <p style="color: #94a3b8; font-size: 0.9rem; margin: 0.5rem 0;">
+                            ${level.width}x${level.height} • ${level.timeLimit}s<br>
+                            Zombies: ${zombieCount} • Items: ${itemCount}
+                        </p>
+                        <div class="level-actions">
+                            <button class="level-btn level-btn-edit" onclick="editLevel(${index})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="level-btn level-btn-play" onclick="playLevel(${index})">
+                                <i class="fas fa-play"></i> Jugar
+                            </button>
+                            <button class="level-btn level-btn-delete" onclick="deleteLevel(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    listContainer.appendChild(levelCard);
+                });
+            }
+
+            document.getElementById('levels-modal').classList.remove('hidden');
+        }
+
+        function editLevel(index) {
+            const level = savedLevels[index];
+            editorState = {
+                tool: TILE_TYPES.WALL,
+                grid: [...level.grid],
+                width: level.width,
+                height: level.height,
+                name: level.name,
+                timeLimit: level.timeLimit
+            };
+            hideMessage();
+            showScreen('editor-screen');
+        }
+
+        function playLevel(index) {
+            currentLevel = savedLevels[index];
+            showScreen('character-select');
+        }
+
+        function deleteLevel(index) {
+            if (confirm('¿Estás seguro de eliminar este nivel?')) {
+                savedLevels.splice(index, 1);
+                localStorage.setItem('zombieLevels', JSON.stringify(savedLevels));
+                showLevels();
+            }
+        }
+
+        // ============================
+        // JUEGO PRINCIPAL
+        // ============================
+        function startGame() {
+            if (!currentLevel) {
+                currentLevel = savedLevels[0];
+            }
+
+            // Inicializar estado del juego
+            gameState = {
+                grid: [...currentLevel.grid],
+                width: currentLevel.width,
+                height: currentLevel.height,
+                player: findStartPosition(),
+                zombies: findZombies(),
+                lives: Math.floor(selectedCharacter.health / 50),
+                time: currentLevel.timeLimit,
+                ammo: 0,
+                keys: 0,
+                playing: true,
+                levelName: currentLevel.name,
+                character: selectedCharacter
+            };
+
+            // Actualizar HUD
+            updateHUD();
+            renderGameGrid();
+
+            // Iniciar temporizador
+            gameState.timer = setInterval(gameLoop, 1000);
+
+            // Iniciar movimiento de zombies
+            gameState.zombieTimer = setInterval(moveZombies, 1500);
+        }
+
+        function findStartPosition() {
+            for (let i = 0; i < gameState.grid.length; i++) {
+                if (gameState.grid[i] === TILE_TYPES.START) {
+                    return {
+                        x: i % gameState.width,
+                        y: Math.floor(i / gameState.width)
+                    };
+                }
+            }
+            return { x: 0, y: 0 };
+        }
+
+        function findZombies() {
+            const zombies = [];
+            for (let i = 0; i < gameState.grid.length; i++) {
+                if (gameState.grid[i] === TILE_TYPES.ZOMBIE) {
+                    zombies.push({
+                        x: i % gameState.width,
+                        y: Math.floor(i / gameState.width),
+                        id: zombies.length
+                    });
+                }
+            }
+            return zombies;
+        }
+
+        function renderGameGrid() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            board.style.gridTemplateColumns = `repeat(${gameState.width}, 40px)`;
+
+            for (let y = 0; y < gameState.height; y++) {
+                for (let x = 0; x < gameState.width; x++) {
+                    const index = y * gameState.width + x;
+                    const tileType = gameState.grid[index];
+                    const config = TILE_CONFIG[tileType];
+
+                    const cell = document.createElement('div');
+                    cell.className = `game-cell ${config.class}`;
+                    
+                    // No mostrar zombies en la capa base (se muestran encima)
+                    if (tileType !== TILE_TYPES.ZOMBIE) {
+                        cell.textContent = config.icon;
+                    }
+
+                    // Mostrar jugador
+                    if (gameState.player.x === x && gameState.player.y === y) {
+                        const player = document.createElement('div');
+                        player.className = 'game-cell player';
+                        player.style.position = 'absolute';
+                        player.style.width = '80%';
+                        player.style.height = '80%';
+                        player.textContent = selectedCharacter.icon;
+                        cell.appendChild(player);
+                    }
+
+                    board.appendChild(cell);
+                }
+            }
+
+            // Mostrar zombies encima
+            gameState.zombies.forEach(zombie => {
+                const index = zombie.y * gameState.width + zombie.x;
+                const cell = board.children[index];
+                const zombieEl = document.createElement('div');
+                zombieEl.className = 'game-cell zombie';
+                zombieEl.style.position = 'absolute';
+                zombieEl.style.width = '80%';
+                zombieEl.style.height = '80%';
+                zombieEl.textContent = '🧟';
+                cell.appendChild(zombieEl);
+            });
+        }
+
+        function updateHUD() {
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('time').textContent = gameState.time;
+            document.getElementById('character-name').textContent = selectedCharacter.name;
+            document.getElementById('ammo').textContent = gameState.ammo;
+            document.getElementById('keys').textContent = gameState.keys;
+            document.getElementById('zombies-count').textContent = gameState.zombies.length;
+        }
+
+        function gameLoop() {
+            if (!gameState.playing) return;
+
+            // Actualizar tiempo
+            gameState.time--;
+            document.getElementById('time').textContent = gameState.time;
+
+            // Verificar fin del tiempo
+            if (gameState.time <= 0) {
+                endGame(false, '¡Se acabó el tiempo!');
+                return;
+            }
+
+            // Verificar si el jugador está en la salida
+            const playerIndex = gameState.player.y * gameState.width + gameState.player.x;
+            if (gameState.grid[playerIndex] === TILE_TYPES.EXIT) {
+                // Verificar si necesita llave
+                const needsKey = gameState.grid.some(t => t === TILE_TYPES.KEY);
+                if (!needsKey || gameState.keys > 0) {
+                    endGame(true, '¡Has escapado con éxito!');
+                }
+            }
+        }
+
+        function moveZombies() {
+            if (!gameState.playing) return;
+
+            gameState.zombies.forEach(zombie => {
+                // Movimiento simple hacia el jugador
+                const dx = Math.sign(gameState.player.x - zombie.x);
+                const dy = Math.sign(gameState.player.y - zombie.y);
+
+                let newX = zombie.x;
+                let newY = zombie.y;
+
+                // Priorizar movimiento horizontal o vertical aleatoriamente
+                if (Math.random() > 0.5 && dx !== 0) {
+                    newX += dx;
+                } else if (dy !== 0) {
+                    newY += dy;
+                }
+
+                // Verificar colisiones
+                if (newX >= 0 && newX < gameState.width && newY >= 0 && newY < gameState.height) {
+                    const newIndex = newY * gameState.width + newX;
+                    const tile = gameState.grid[newIndex];
+                    
+                    // Zombies no pueden pasar por paredes, rocas o cajas
+                    if (![TILE_TYPES.WALL, TILE_TYPES.ROCK, TILE_TYPES.BOX, TILE_TYPES.WATER, TILE_TYPES.EXIT].includes(tile)) {
+                        zombie.x = newX;
+                        zombie.y = newY;
+                    }
+                }
+
+                // Verificar colisión con jugador
+                if (zombie.x === gameState.player.x && zombie.y === gameState.player.y) {
+                    gameState.lives--;
+                    updateHUD();
+                    
+                    if (gameState.lives <= 0) {
+                        endGame(false, '¡Los zombies te han devorado!');
+                    } else {
+                        showMessage('¡Zombie!', 'Un zombie te ha atacado. -1 vida.', 1000);
+                    }
+                }
+            });
+
+            renderGameGrid();
+        }
+
+        function movePlayer(dx, dy) {
+            if (!gameState.playing) return;
+
+            const newX = gameState.player.x + dx;
+            const newY = gameState.player.y + dy;
+
+            // Verificar límites
+            if (newX < 0 || newX >= gameState.width || newY < 0 || newY >= gameState.height) {
+                return;
+            }
+
+            const newIndex = newY * gameState.width + newX;
+            const tile = gameState.grid[newIndex];
+
+            // Verificar colisiones
+            if ([TILE_TYPES.WALL, TILE_TYPES.ROCK, TILE_TYPES.BOX, TILE_TYPES.WATER].includes(tile)) {
+                return;
+            }
+
+            // Recolectar items
+            if (tile === TILE_TYPES.RIFLE || tile === TILE_TYPES.SHOTGUN) {
+                gameState.ammo += 5;
+                gameState.grid[newIndex] = TILE_TYPES.EMPTY;
+                showMessage('¡Arma encontrada!', '+5 munición', 1000);
+            } else if (tile === TILE_TYPES.KEY) {
+                gameState.keys++;
+                gameState.grid[newIndex] = TILE_TYPES.EMPTY;
+                showMessage('¡Llave encontrada!', 'Ahora puedes salir', 1000);
+            } else if (tile === TILE_TYPES.PORTAL) {
+                // Teletransportar a posición aleatoria
+                let randomPos;
+                do {
+                    randomPos = {
+                        x: Math.floor(Math.random() * gameState.width),
+                        y: Math.floor(Math.random() * gameState.height)
+                    };
+                } while (gameState.grid[randomPos.y * gameState.width + randomPos.x] !== TILE_TYPES.EMPTY);
+                
+                gameState.player = randomPos;
+                showMessage('¡Portal!', 'Teletransportado', 1000);
+                renderGameGrid();
+                updateHUD();
+                return;
+            }
+
+            // Mover jugador
+            gameState.player.x = newX;
+            gameState.player.y = newY;
+            renderGameGrid();
+            updateHUD();
+        }
+
+        function attack() {
+            if (!gameState.playing || gameState.ammo <= 0) {
+                showMessage('Sin munición', 'Busca armas para atacar', 1000);
+                return;
+            }
+
+            gameState.ammo--;
+            
+            // Eliminar zombies cercanos
+            const zombiesBefore = gameState.zombies.length;
+            gameState.zombies = gameState.zombies.filter(zombie => {
+                const distance = Math.abs(zombie.x - gameState.player.x) + Math.abs(zombie.y - gameState.player.y);
+                return distance > 1; // Solo mata zombies adyacentes
+            });
+
+            if (gameState.zombies.length < zombiesBefore) {
+                showMessage('¡Ataque exitoso!', `Eliminaste ${zombiesBefore - gameState.zombies.length} zombies`, 1000);
+            }
+
+            updateHUD();
+            renderGameGrid();
+        }
+
+        function endGame(won, message) {
+            gameState.playing = false;
+            clearInterval(gameState.timer);
+            clearInterval(gameState.zombieTimer);
+
+            showMessage(
+                won ? '¡VICTORIA!' : '¡GAME OVER!',
+                `${message}<br><br>Personaje: ${selectedCharacter.name}<br>Vidas restantes: ${gameState.lives}<br>Tiempo restante: ${gameState.time}s`,
+                0
+            );
+
+            document.getElementById('message-button').onclick = () => {
+                hideMessage();
+                showScreen('main-menu');
+            };
+        }
+
+        // ============================
+        // CONTROLES DE TECLADO
+        // ============================
+        function handleKeyPress(e) {
+            if (currentScreen !== 'game-screen' || !gameState.playing) return;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    movePlayer(0, -1);
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    movePlayer(0, 1);
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    movePlayer(-1, 0);
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    movePlayer(1, 0);
+                    break;
+                case ' ':
+                case 'Spacebar':
+                    attack();
+                    break;
+                case 'Escape':
+                    showScreen('main-menu');
+                    break;
+            }
+        }
+
+        // ============================
+        // SISTEMA DE MENSAJES
+        // ============================
+        function showMessage(title, text, autoHide = 3000) {
+            document.getElementById('message-title').textContent = title;
+            document.getElementById('message-text').innerHTML = text;
+            document.getElementById('message-modal').classList.remove('hidden');
+
+            if (autoHide > 0) {
+                setTimeout(hideMessage, autoHide);
+            }
+        }
+
+        function hideMessage() {
+            document.getElementById('message-modal').classList.add('hidden');
+            document.getElementById('levels-modal').classList.add('hidden');
+        }
+
+        // ============================
+        // FUNCIONES DE UTILIDAD
+        // ============================
+        function createNewLevel() {
+            editorState = {
+                tool: TILE_TYPES.WALL,
+                grid: Array(100).fill(TILE_TYPES.EMPTY),
+                width: 10,
+                height: 10,
+                name: 'Nuevo Nivel',
+                timeLimit: 60
+            };
+            showScreen('editor-screen');
+        }
+
+        // Inicializar con un nivel por defecto
+        if (savedLevels.length === 0) {
+            const defaultGrid = Array(100).fill(TILE_TYPES.EMPTY);
+            
+            // Poner entrada
+            defaultGrid[0] = TILE_TYPES.START;
+            
+            // Poner salida
+            defaultGrid[99] = TILE_TYPES.EXIT;
+            
+            // Poner algunos zombies
+            defaultGrid[13] = TILE_TYPES.ZOMBIE;
+            defaultGrid[24] = TILE_TYPES.ZOMBIE;
+            defaultGrid[35] = TILE_TYPES.ZOMBIE;
+            
+            // Poner algunos obstáculos
+            defaultGrid[45] = TILE_TYPES.WALL;
+            defaultGrid[46] = TILE_TYPES.ROCK;
+            defaultGrid[47] = TILE_TYPES.BOX;
+            
+            // Poner items
+            defaultGrid[32] = TILE_TYPES.RIFLE;
+            defaultGrid[68] = TILE_TYPES.SHOTGUN;
+            defaultGrid[81] = TILE_TYPES.KEY;
+            
+            savedLevels[0] = {
+                name: 'Nivel 1 - El Comienzo',
+                width: 10,
+                height: 10,
+                timeLimit: 60,
+                grid: defaultGrid
+            };
+        }
+    </script>
 </body>
 </html>
