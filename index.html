@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sandbox Arena</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -48,6 +51,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            transition: opacity 0.5s ease;
         }
 
         .video-container {
@@ -127,6 +131,7 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            transition: opacity 0.5s ease;
         }
 
         .loading-container {
@@ -969,6 +974,54 @@
             display: block;
         }
 
+        /* Tabla de highscore */
+        .highscore-container {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 800px;
+        }
+
+        .highscore-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .highscore-table th {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem;
+            text-align: left;
+            color: var(--accent);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .highscore-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .highscore-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .highscore-rank {
+            width: 60px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .highscore-name {
+            font-weight: bold;
+        }
+
+        .highscore-score {
+            color: var(--accent);
+            font-weight: bold;
+            text-align: right;
+        }
+
         /* Animaciones */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -1111,7 +1164,7 @@
     <!-- Carátula de video -->
     <div id="video-intro">
         <div class="video-container">
-            <video id="intro-video" preload="auto" playsinline>
+            <video id="intro-video" preload="auto" playsinline muted>
                 <source src="caratula.mp4" type="video/mp4">
                 Tu navegador no soporta el video.
             </video>
@@ -1181,6 +1234,14 @@
                 <h2>Niveles Guardados</h2>
                 <p>Gestiona y juega tus niveles creados. ¡Personaliza tu experiencia!</p>
             </div>
+
+            <div class="menu-card" onclick="showHighscoreTable()">
+                <div class="menu-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2>Highscore Global</h2>
+                <p>Compara tus puntajes con jugadores de todo el mundo. ¡Llega a la cima!</p>
+            </div>
         </div>
 
         <!-- Personajes directamente en el menú principal -->
@@ -1190,6 +1251,34 @@
 
         <div class="text-center mb-4">
             <p class="subtitle">Selecciona un personaje para comenzar la aventura</p>
+        </div>
+
+        <!-- Tabla de highscore -->
+        <div class="highscore-container" id="highscore-container" style="display: none;">
+            <h2 class="text-center mb-2">🏆 Highscore Global</h2>
+            <div id="highscore-loading" class="text-center">
+                <p>Cargando puntajes...</p>
+            </div>
+            <table class="highscore-table" id="highscore-table">
+                <thead>
+                    <tr>
+                        <th class="highscore-rank">#</th>
+                        <th>Jugador</th>
+                        <th>Personaje</th>
+                        <th>Nivel</th>
+                        <th class="highscore-score">Puntaje</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody id="highscore-body">
+                    <!-- Los puntajes se cargarán aquí -->
+                </tbody>
+            </table>
+            <div class="text-center mt-3">
+                <button class="btn btn-secondary" onclick="hideHighscoreTable()">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1401,6 +1490,23 @@
     </div>
 
     <script>
+        // ============================
+        // CONFIGURACIÓN DE FIREBASE
+        // ============================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDM9GK7_gnd0GaVbxwK9xnwl0qk75MnFXw",
+            authDomain: "playmobil-2d74d.firebaseapp.com",
+            projectId: "playmobil-2d74d",
+            storageBucket: "playmobil-2d74d.firebasestorage.app",
+            messagingSenderId: "85202851148",
+            appId: "1:85202851148:web:bf8eba63238c06c7b4ebe9",
+            measurementId: "G-MX2B76PCD6"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
         // ============================
         // CONFIGURACIÓN Y CONSTANTES
         // ============================
@@ -1645,7 +1751,8 @@
             totalZombies: 0,
             currentLevel: 1,
             playerCoins: 0,
-            unlockedCharacters: ['civil']
+            unlockedCharacters: ['civil'],
+            playerName: 'Jugador' + Math.floor(Math.random() * 10000)
         };
 
         // Variables para configuración de nivel
@@ -1656,69 +1763,16 @@
         let titleClickCount = 0;
         let hiddenMenuVisible = false;
 
+        // Highscore global
+        let globalHighscores = [];
+
         // ============================
         // INICIALIZACIÓN
         // ============================
         document.addEventListener('DOMContentLoaded', async () => {
-            // Iniciar carátula de video
-            startVideoIntro();
+            // Mostrar pantalla de carga directamente
+            startLoadingScreen();
         });
-
-        function startVideoIntro() {
-            const video = document.getElementById('intro-video');
-            const videoIntro = document.getElementById('video-intro');
-            const loadingProgress = document.getElementById('video-loading-progress');
-            
-            // Intentar cargar el video
-            video.load();
-            
-            // Configurar eventos del video
-            video.onloadeddata = function() {
-                console.log('Video cargado, empezando...');
-                loadingProgress.style.width = '50%';
-                
-                // Intentar reproducir
-                video.play().then(() => {
-                    console.log('Video reproduciéndose');
-                    loadingProgress.style.width = '100%';
-                    
-                    // Cuando el video termine, ir a carga
-                    video.onended = function() {
-                        console.log('Video terminado, mostrando pantalla de carga');
-                        videoIntro.style.opacity = '0';
-                        setTimeout(() => {
-                            videoIntro.style.display = 'none';
-                            startLoadingScreen();
-                        }, 500);
-                    };
-                    
-                }).catch(error => {
-                    console.log('Error al reproducir video:', error);
-                    // Si hay error, saltar directamente
-                    skipIntro();
-                });
-            };
-            
-            video.onerror = function() {
-                console.log('Error cargando video, usando fallback');
-                skipIntro();
-            };
-            
-            // Configurar barra de progreso basada en tiempo de carga
-            video.onprogress = function() {
-                if (video.buffered.length > 0) {
-                    const loaded = video.buffered.end(0);
-                    const total = video.duration;
-                    if (total > 0) {
-                        const percent = (loaded / total) * 100;
-                        loadingProgress.style.width = Math.min(percent, 100) + '%';
-                    }
-                }
-            };
-            
-            // Configurar botón de saltar
-            document.querySelector('.video-skip-btn').onclick = skipIntro;
-        }
 
         function skipIntro() {
             const videoIntro = document.getElementById('video-intro');
@@ -1757,6 +1811,9 @@
             // Cargar configuración de nivel
             loadLevelConfig();
 
+            // Cargar highscore global
+            loadGlobalHighscores();
+
             // Simular carga
             simulateLoading();
         }
@@ -1771,8 +1828,10 @@
             }
             
             // Actualizar elementos de la UI
-            document.getElementById('editor-board-size').value = selectedBoardSize;
-            document.getElementById('editor-time').value = selectedGameTime;
+            if (document.getElementById('editor-board-size')) {
+                document.getElementById('editor-board-size').value = selectedBoardSize;
+                document.getElementById('editor-time').value = selectedGameTime;
+            }
         }
 
         function saveLevelConfig() {
@@ -1828,38 +1887,193 @@
         }
 
         // ============================
+        // SISTEMA DE HIGHSCORE CON FIREBASE
+        // ============================
+        async function loadGlobalHighscores() {
+            try {
+                const snapshot = await db.collection('highscores')
+                    .orderBy('score', 'desc')
+                    .limit(20)
+                    .get();
+                
+                globalHighscores = [];
+                snapshot.forEach(doc => {
+                    globalHighscores.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log('Highscores cargados:', globalHighscores.length);
+            } catch (error) {
+                console.error('Error cargando highscores:', error);
+            }
+        }
+
+        async function saveHighscore(scoreData) {
+            try {
+                // Calcular puntaje total
+                const totalScore = calculateTotalScore(scoreData);
+                
+                // Crear registro de highscore
+                const highscore = {
+                    playerName: gameStats.playerName,
+                    character: selectedCharacter ? selectedCharacter.name : 'Desconocido',
+                    level: currentLevelIndex + 1,
+                    score: totalScore,
+                    coins: scoreData.coins,
+                    zombiesKilled: scoreData.zombiesKilled,
+                    livesLeft: scoreData.lives,
+                    timeLeft: scoreData.time,
+                    date: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Guardar en Firebase
+                await db.collection('highscores').add(highscore);
+                
+                console.log('Highscore guardado:', highscore);
+                return true;
+            } catch (error) {
+                console.error('Error guardando highscore:', error);
+                return false;
+            }
+        }
+
+        function calculateTotalScore(scoreData) {
+            let total = 0;
+            
+            // Puntos por monedas
+            total += scoreData.coins * 10;
+            
+            // Puntos por zombies eliminados
+            total += scoreData.zombiesKilled * 50;
+            
+            // Puntos por vidas restantes
+            total += scoreData.lives * 20;
+            
+            // Puntos por tiempo restante
+            total += scoreData.time * 5;
+            
+            // Bonus por completar nivel
+            if (scoreData.won) {
+                total += 1000;
+            }
+            
+            // Multiplicador por nivel
+            total *= (currentLevelIndex + 1);
+            
+            return total;
+        }
+
+        function showHighscoreTable() {
+            const container = document.getElementById('highscore-container');
+            const tableBody = document.getElementById('highscore-body');
+            const loading = document.getElementById('highscore-loading');
+            
+            container.style.display = 'block';
+            
+            if (globalHighscores.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center" style="color: #94a3b8;">
+                            No hay puntajes registrados todavía
+                        </td>
+                    </tr>
+                `;
+                loading.style.display = 'none';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            
+            globalHighscores.forEach((score, index) => {
+                const date = score.date ? new Date(score.date.seconds * 1000).toLocaleDateString() : 'Hoy';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="highscore-rank">
+                        ${index + 1}
+                        ${index < 3 ? getMedalEmoji(index) : ''}
+                    </td>
+                    <td class="highscore-name">${score.playerName}</td>
+                    <td>${score.character}</td>
+                    <td>${score.level}</td>
+                    <td class="highscore-score">${score.score.toLocaleString()}</td>
+                    <td style="color: #94a3b8; font-size: 0.9rem;">${date}</td>
+                `;
+                
+                // Destacar si es el jugador actual
+                if (score.playerName === gameStats.playerName) {
+                    row.style.backgroundColor = 'rgba(251, 191, 36, 0.1)';
+                    row.style.borderLeft = '3px solid var(--accent)';
+                }
+                
+                tableBody.appendChild(row);
+            });
+            
+            loading.style.display = 'none';
+        }
+
+        function getMedalEmoji(rank) {
+            switch(rank) {
+                case 0: return '🥇';
+                case 1: return '🥈';
+                case 2: return '🥉';
+                default: return '';
+            }
+        }
+
+        function hideHighscoreTable() {
+            document.getElementById('highscore-container').style.display = 'none';
+        }
+
+        // ============================
         // MANEJO DE PANTALLAS
         // ============================
         function showScreen(screenName) {
             // Ocultar todas las pantallas
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('main-menu').classList.remove('screen-active');
-            document.getElementById('character-select').classList.remove('screen-active');
-            document.getElementById('editor-screen').classList.remove('screen-active');
-            document.getElementById('game-screen').classList.remove('screen-active');
+            const screens = ['loading-screen', 'main-menu', 'character-select', 'editor-screen', 'game-screen'];
+            screens.forEach(screen => {
+                const element = document.getElementById(screen);
+                if (element) {
+                    element.classList.remove('screen-active');
+                    element.style.display = 'none';
+                }
+            });
 
             // Ocultar modales
             hideMessage();
-            document.getElementById('inventory-modal').classList.remove('active');
-            document.getElementById('bomb-selector').classList.remove('active');
-            document.getElementById('pause-overlay').classList.remove('active');
+            hideHighscoreTable();
+            
+            const inventoryModal = document.getElementById('inventory-modal');
+            if (inventoryModal) inventoryModal.classList.remove('active');
+            
+            const bombSelector = document.getElementById('bomb-selector');
+            if (bombSelector) bombSelector.classList.remove('active');
+            
+            const pauseOverlay = document.getElementById('pause-overlay');
+            if (pauseOverlay) pauseOverlay.classList.remove('active');
 
             currentScreen = screenName;
 
+            // Mostrar la pantalla correspondiente
+            const targetScreen = document.getElementById(screenName);
+            if (targetScreen) {
+                targetScreen.style.display = screenName === 'loading-screen' ? 'flex' : 'block';
+                if (screenName !== 'loading-screen' && screenName !== 'video-intro') {
+                    targetScreen.classList.add('screen-active');
+                }
+            }
+
             switch(screenName) {
                 case 'main-menu':
-                    document.getElementById('main-menu').classList.add('screen-active');
                     updateStatsDisplay();
-                    break;
-                case 'character-select':
-                    document.getElementById('character-select').classList.add('screen-active');
+                    // Recargar highscores si no están cargados
+                    if (globalHighscores.length === 0) {
+                        loadGlobalHighscores();
+                    }
                     break;
                 case 'editor-screen':
-                    document.getElementById('editor-screen').classList.add('screen-active');
                     loadEditor();
                     break;
                 case 'game-screen':
-                    document.getElementById('game-screen').classList.add('screen-active');
                     startGame();
                     break;
             }
@@ -1876,7 +2090,10 @@
             
             if (titleClickCount >= 7 && !hiddenMenuVisible) {
                 hiddenMenuVisible = true;
-                document.getElementById('hidden-menu-options').classList.remove('hidden');
+                const hiddenMenu = document.getElementById('hidden-menu-options');
+                if (hiddenMenu) {
+                    hiddenMenu.classList.remove('hidden');
+                }
                 showMessage('¡Modos Desbloqueados!', 'Has desbloqueado el Modo Cerebro y Niveles Guardados', 3000);
             }
             
@@ -1893,6 +2110,8 @@
         // ============================
         function initializeCharacters() {
             const container = document.getElementById('characters-container');
+            if (!container) return;
+            
             container.innerHTML = '';
 
             CHARACTERS.forEach(char => {
@@ -1902,12 +2121,10 @@
                 // Verificar si el personaje está desbloqueado
                 const isUnlocked = !char.premium || gameStats.unlockedCharacters.includes(char.id);
                 
-                if (!selectedCharacter) {
+                if (!selectedCharacter && isUnlocked) {
                     selectedCharacter = char;
-                    if (isUnlocked) {
-                        card.classList.add('selected');
-                    }
-                } else if (char.id === selectedCharacter.id && isUnlocked) {
+                    card.classList.add('selected');
+                } else if (selectedCharacter && char.id === selectedCharacter.id && isUnlocked) {
                     card.classList.add('selected');
                 }
 
@@ -1951,26 +2168,16 @@
                 } else if (!canAfford) {
                     card.style.opacity = '0.8';
                     card.title = `Necesitas ${char.price - gameStats.playerCoins} monedas más`;
+                } else {
+                    card.onclick = () => {
+                        document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        selectedCharacter = char;
+                        
+                        // Comenzar juego inmediatamente
+                        startSelectedLevel();
+                    };
                 }
-
-                card.onclick = () => {
-                    if (!isUnlocked) {
-                        showMessage('Personaje Bloqueado', `Necesitas ${char.price} monedas para desbloquear a ${char.name}`, 2000);
-                        return;
-                    }
-                    
-                    if (!canAfford) {
-                        showMessage('Monedas Insuficientes', `Te faltan ${char.price - gameStats.playerCoins} monedas para ${char.name}`, 2000);
-                        return;
-                    }
-                    
-                    document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                    selectedCharacter = char;
-                    
-                    // Comenzar juego inmediatamente
-                    startSelectedLevel();
-                };
 
                 container.appendChild(card);
             });
@@ -1988,6 +2195,8 @@
 
         function showLevelsToPlay() {
             const listContainer = document.getElementById('levels-list');
+            if (!listContainer) return;
+            
             listContainer.innerHTML = '';
 
             if (savedLevels.length === 0) {
@@ -2019,13 +2228,19 @@
                 });
             }
 
-            document.getElementById('levels-modal').classList.add('active');
+            const levelsModal = document.getElementById('levels-modal');
+            if (levelsModal) {
+                levelsModal.classList.add('active');
+            }
         }
 
         function playSelectedLevel(index) {
             currentLevelIndex = index;
             currentLevel = savedLevels[index];
-            document.getElementById('levels-modal').classList.remove('active');
+            const levelsModal = document.getElementById('levels-modal');
+            if (levelsModal) {
+                levelsModal.classList.remove('active');
+            }
             showScreen('game-screen');
         }
 
@@ -2035,6 +2250,8 @@
         function initializeEditor() {
             // Cargar herramientas
             const toolsContainer = document.getElementById('editor-tools');
+            if (!toolsContainer) return;
+            
             toolsContainer.innerHTML = '';
 
             Object.entries(TILE_TYPES).forEach(([key, type]) => {
@@ -2063,18 +2280,26 @@
 
         function loadEditor() {
             // Actualizar configuración desde inputs
-            editorState.width = parseInt(document.getElementById('editor-board-size').value);
-            editorState.height = parseInt(document.getElementById('editor-board-size').value);
-            editorState.timeLimit = parseInt(document.getElementById('editor-time').value);
-            editorState.name = document.getElementById('editor-level-name-input').value;
+            const boardSize = document.getElementById('editor-board-size');
+            const editorTime = document.getElementById('editor-time');
+            const levelNameInput = document.getElementById('editor-level-name-input');
+            
+            if (boardSize && editorTime && levelNameInput) {
+                editorState.width = parseInt(boardSize.value);
+                editorState.height = parseInt(boardSize.value);
+                editorState.timeLimit = parseInt(editorTime.value);
+                editorState.name = levelNameInput.value;
+            }
             
             // Si no hay grid o el tamaño cambió, crear uno nuevo
             if (editorState.grid.length !== editorState.width * editorState.height) {
                 editorState.grid = Array(editorState.width * editorState.height).fill(TILE_TYPES.EMPTY);
                 
                 // Poner entrada y salida por defecto
-                editorState.grid[0] = TILE_TYPES.START;
-                editorState.grid[editorState.grid.length - 1] = TILE_TYPES.EXIT;
+                if (editorState.grid.length > 0) {
+                    editorState.grid[0] = TILE_TYPES.START;
+                    editorState.grid[editorState.grid.length - 1] = TILE_TYPES.EXIT;
+                }
             }
             
             renderEditorGrid();
@@ -2082,6 +2307,8 @@
 
         function renderEditorGrid() {
             const board = document.getElementById('editor-board');
+            if (!board) return;
+            
             board.innerHTML = '';
             board.style.gridTemplateColumns = `repeat(${editorState.width}, 40px)`;
 
@@ -2143,20 +2370,30 @@
             editorState.grid[99] = TILE_TYPES.EXIT;
             
             // Actualizar inputs
-            document.getElementById('editor-board-size').value = '10';
-            document.getElementById('editor-time').value = '120';
-            document.getElementById('editor-level-name-input').value = 'Mi Nivel Personalizado';
+            const boardSize = document.getElementById('editor-board-size');
+            const editorTime = document.getElementById('editor-time');
+            const levelNameInput = document.getElementById('editor-level-name-input');
+            
+            if (boardSize) boardSize.value = '10';
+            if (editorTime) editorTime.value = '120';
+            if (levelNameInput) levelNameInput.value = 'Mi Nivel Personalizado';
             
             loadEditor();
         }
 
         function saveLevel() {
-            const name = document.getElementById('editor-level-name-input').value || 'Mi Nivel Personalizado';
+            const levelNameInput = document.getElementById('editor-level-name-input');
+            const editorTime = document.getElementById('editor-time');
+            const boardSize = document.getElementById('editor-board-size');
+            
+            if (!levelNameInput || !editorTime || !boardSize) return;
+            
+            const name = levelNameInput.value || 'Mi Nivel Personalizado';
             
             editorState.name = name;
-            editorState.timeLimit = parseInt(document.getElementById('editor-time').value) || 120;
-            editorState.width = parseInt(document.getElementById('editor-board-size').value);
-            editorState.height = parseInt(document.getElementById('editor-board-size').value);
+            editorState.timeLimit = parseInt(editorTime.value) || 120;
+            editorState.width = parseInt(boardSize.value);
+            editorState.height = parseInt(boardSize.value);
             
             const newLevel = {
                 name: editorState.name,
@@ -2177,6 +2414,8 @@
         // ============================
         function showLevels() {
             const listContainer = document.getElementById('levels-list');
+            if (!listContainer) return;
+            
             listContainer.innerHTML = '';
 
             if (savedLevels.length === 0) {
@@ -2214,10 +2453,15 @@
                 });
             }
 
-            document.getElementById('levels-modal').classList.add('active');
+            const levelsModal = document.getElementById('levels-modal');
+            if (levelsModal) {
+                levelsModal.classList.add('active');
+            }
         }
 
         function editLevel(index) {
+            if (index < 0 || index >= savedLevels.length) return;
+            
             const level = savedLevels[index];
             editorState = {
                 tool: TILE_TYPES.WALL,
@@ -2229,22 +2473,36 @@
             };
             
             // Actualizar inputs
-            document.getElementById('editor-board-size').value = level.width;
-            document.getElementById('editor-time').value = level.timeLimit;
-            document.getElementById('editor-level-name-input').value = level.name;
+            const boardSize = document.getElementById('editor-board-size');
+            const editorTime = document.getElementById('editor-time');
+            const levelNameInput = document.getElementById('editor-level-name-input');
             
-            document.getElementById('levels-modal').classList.remove('active');
+            if (boardSize) boardSize.value = level.width;
+            if (editorTime) editorTime.value = level.timeLimit;
+            if (levelNameInput) levelNameInput.value = level.name;
+            
+            const levelsModal = document.getElementById('levels-modal');
+            if (levelsModal) {
+                levelsModal.classList.remove('active');
+            }
             showScreen('editor-screen');
         }
 
         function playLevel(index) {
+            if (index < 0 || index >= savedLevels.length) return;
+            
             currentLevelIndex = index;
             currentLevel = savedLevels[index];
-            document.getElementById('levels-modal').classList.remove('active');
+            const levelsModal = document.getElementById('levels-modal');
+            if (levelsModal) {
+                levelsModal.classList.remove('active');
+            }
             showScreen('main-menu');
         }
 
         function deleteLevel(index) {
+            if (index < 0 || index >= savedLevels.length) return;
+            
             if (confirm('¿Estás seguro de eliminar este nivel?')) {
                 savedLevels.splice(index, 1);
                 localStorage.setItem('sandboxLevels', JSON.stringify(savedLevels));
@@ -2308,8 +2566,11 @@
             renderGameGrid();
 
             // Mostrar nivel actual
-            document.getElementById('current-level').textContent = gameStats.currentLevel;
-            document.getElementById('character-name').textContent = selectedCharacter.name;
+            const currentLevelEl = document.getElementById('current-level');
+            const characterNameEl = document.getElementById('character-name');
+            
+            if (currentLevelEl) currentLevelEl.textContent = gameStats.currentLevel;
+            if (characterNameEl) characterNameEl.textContent = selectedCharacter.name;
 
             // Iniciar temporizador
             if (gameState.timer) clearInterval(gameState.timer);
@@ -2354,6 +2615,8 @@
 
         function renderGameGrid() {
             const board = document.getElementById('game-board');
+            if (!board) return;
+            
             board.innerHTML = '';
             board.style.gridTemplateColumns = `repeat(${gameState.width}, 40px)`;
 
@@ -2400,14 +2663,23 @@
         }
 
         function updateHUD() {
-            document.getElementById('lives').textContent = gameState.lives;
-            document.getElementById('time').textContent = gameState.time;
-            document.getElementById('character-name').textContent = selectedCharacter.name;
-            document.getElementById('ammo').textContent = gameState.ammo;
-            document.getElementById('keys').textContent = gameState.keys;
-            document.getElementById('coins').textContent = gameState.coins;
-            document.getElementById('bombs').textContent = gameState.bombs;
-            document.getElementById('shots').textContent = `${gameState.shots}/${gameState.maxShots}`;
+            const elements = {
+                'lives': document.getElementById('lives'),
+                'time': document.getElementById('time'),
+                'character-name': document.getElementById('character-name'),
+                'keys': document.getElementById('keys'),
+                'coins': document.getElementById('coins'),
+                'bombs': document.getElementById('bombs'),
+                'shots': document.getElementById('shots')
+            };
+
+            if (elements.lives) elements.lives.textContent = gameState.lives;
+            if (elements.time) elements.time.textContent = gameState.time;
+            if (elements['character-name']) elements['character-name'].textContent = selectedCharacter.name;
+            if (elements.keys) elements.keys.textContent = gameState.keys;
+            if (elements.coins) elements.coins.textContent = gameState.coins;
+            if (elements.bombs) elements.bombs.textContent = gameState.bombs;
+            if (elements.shots) elements.shots.textContent = `${gameState.shots}/${gameState.maxShots}`;
         }
 
         function togglePause() {
@@ -2416,16 +2688,21 @@
             gameState.paused = !gameState.paused;
             const pauseOverlay = document.getElementById('pause-overlay');
             
-            if (gameState.paused) {
-                pauseOverlay.classList.add('active');
-            } else {
-                pauseOverlay.classList.remove('active');
+            if (pauseOverlay) {
+                if (gameState.paused) {
+                    pauseOverlay.classList.add('active');
+                } else {
+                    pauseOverlay.classList.remove('active');
+                }
             }
         }
 
         function resumeGame() {
             gameState.paused = false;
-            document.getElementById('pause-overlay').classList.remove('active');
+            const pauseOverlay = document.getElementById('pause-overlay');
+            if (pauseOverlay) {
+                pauseOverlay.classList.remove('active');
+            }
         }
 
         function gameLoop() {
@@ -2433,7 +2710,8 @@
 
             // Actualizar tiempo
             gameState.time--;
-            document.getElementById('time').textContent = gameState.time;
+            const timeEl = document.getElementById('time');
+            if (timeEl) timeEl.textContent = gameState.time;
 
             // Verificar fin del tiempo
             if (gameState.time <= 0) {
@@ -2457,10 +2735,14 @@
             // Actualizar contador de agua si está activo
             if (gameState.waterSteps > 0) {
                 gameState.waterSteps--;
-                if (gameState.waterSteps <= 0) {
-                    document.getElementById('water-counter').classList.remove('active');
-                } else {
-                    document.getElementById('water-steps').textContent = `${gameState.waterSteps}/5`;
+                const waterStepsEl = document.getElementById('water-steps');
+                const waterCounter = document.getElementById('water-counter');
+                
+                if (waterStepsEl) waterStepsEl.textContent = `${gameState.waterSteps}/5`;
+                if (waterCounter) {
+                    if (gameState.waterSteps <= 0) {
+                        waterCounter.classList.remove('active');
+                    }
                 }
             }
         }
@@ -2523,7 +2805,8 @@
                 gameState.player.y = gameState.startPosition.y;
                 gameState.waterSteps = 0;
                 gameState.hasBox = false;
-                document.getElementById('water-counter').classList.remove('active');
+                const waterCounter = document.getElementById('water-counter');
+                if (waterCounter) waterCounter.classList.remove('active');
             }
         }
 
@@ -2595,7 +2878,8 @@
             // Actualizar contador de agua
             if (tile !== TILE_TYPES.WATER && gameState.waterSteps > 0) {
                 gameState.waterSteps = 0;
-                document.getElementById('water-counter').classList.remove('active');
+                const waterCounter = document.getElementById('water-counter');
+                if (waterCounter) waterCounter.classList.remove('active');
             }
 
             // Verificar caída de caja si la tenía
@@ -2650,8 +2934,11 @@
 
         function moveIntoWater(dx, dy, newX, newY) {
             gameState.waterSteps++;
-            document.getElementById('water-counter').classList.add('active');
-            document.getElementById('water-steps').textContent = `${gameState.waterSteps}/5`;
+            const waterCounter = document.getElementById('water-counter');
+            const waterStepsEl = document.getElementById('water-steps');
+            
+            if (waterCounter) waterCounter.classList.add('active');
+            if (waterStepsEl) waterStepsEl.textContent = `${gameState.waterSteps}/5`;
             
             if (gameState.waterSteps > 5) {
                 gameState.lives--;
@@ -2665,7 +2952,7 @@
                 // Volver al inicio
                 gameState.player.x = gameState.startPosition.x;
                 gameState.player.y = gameState.startPosition.y;
-                document.getElementById('water-counter').classList.remove('active');
+                if (waterCounter) waterCounter.classList.remove('active');
             } else {
                 gameState.player.x = newX;
                 gameState.player.y = newY;
@@ -2974,6 +3261,8 @@
 
         function createProjectileAnimation() {
             const board = document.getElementById('game-board');
+            if (!board) return;
+            
             const playerCell = board.querySelector('.player-cell');
             
             if (!playerCell) return;
@@ -3015,7 +3304,10 @@
                 return;
             }
             
-            document.getElementById('bomb-selector').classList.add('active');
+            const bombSelector = document.getElementById('bomb-selector');
+            if (bombSelector) {
+                bombSelector.classList.add('active');
+            }
         }
 
         function placeBomb() {
@@ -3031,14 +3323,20 @@
             };
             
             gameState.activeBombs.push(bomb);
-            document.getElementById('bomb-selector').classList.remove('active');
+            const bombSelector = document.getElementById('bomb-selector');
+            if (bombSelector) {
+                bombSelector.classList.remove('active');
+            }
             showMessage('¡Bomba colocada!', 'Explotará en 10 segundos', 1000);
             updateHUD();
             renderGameGrid();
         }
 
         function cancelBomb() {
-            document.getElementById('bomb-selector').classList.remove('active');
+            const bombSelector = document.getElementById('bomb-selector');
+            if (bombSelector) {
+                bombSelector.classList.remove('active');
+            }
         }
 
         function checkBombs() {
@@ -3103,6 +3401,8 @@
 
         function toggleInventory() {
             const modal = document.getElementById('inventory-modal');
+            if (!modal) return;
+            
             modal.classList.toggle('active');
             
             if (modal.classList.contains('active')) {
@@ -3112,6 +3412,8 @@
 
         function updateInventoryDisplay() {
             const container = document.getElementById('inventory-items');
+            if (!container) return;
+            
             container.innerHTML = '';
             
             const items = [
@@ -3226,7 +3528,7 @@
             }
         }
 
-        function endGame(won, message) {
+        async function endGame(won, message) {
             gameState.playing = false;
             clearInterval(gameState.timer);
             clearInterval(gameState.zombieTimer);
@@ -3239,6 +3541,20 @@
                 // Ganar monedas por completar nivel
                 gameStats.playerCoins += 10;
                 saveStats();
+                
+                // Guardar highscore en Firebase
+                const scoreData = {
+                    won: true,
+                    coins: gameState.coins,
+                    zombiesKilled: gameState.stats.zombiesKilled,
+                    lives: gameState.lives,
+                    time: gameState.time
+                };
+                
+                await saveHighscore(scoreData);
+                
+                // Recargar highscores
+                loadGlobalHighscores();
             }
 
             showMessage(
@@ -3247,24 +3563,27 @@
                 0
             );
 
-            document.getElementById('message-button').onclick = () => {
-                hideMessage();
-                if (won) {
-                    // Avanzar al siguiente nivel
-                    currentLevelIndex++;
-                    if (currentLevelIndex >= savedLevels.length) {
-                        currentLevelIndex = 0;
-                        showMessage('¡Felicidades!', 'Has completado todos los niveles.', 3000);
-                        setTimeout(() => showScreen('main-menu'), 3000);
+            const messageButton = document.getElementById('message-button');
+            if (messageButton) {
+                messageButton.onclick = () => {
+                    hideMessage();
+                    if (won) {
+                        // Avanzar al siguiente nivel
+                        currentLevelIndex++;
+                        if (currentLevelIndex >= savedLevels.length) {
+                            currentLevelIndex = 0;
+                            showMessage('¡Felicidades!', 'Has completado todos los niveles.', 3000);
+                            setTimeout(() => showScreen('main-menu'), 3000);
+                        } else {
+                            currentLevel = savedLevels[currentLevelIndex];
+                            startGame();
+                        }
                     } else {
-                        currentLevel = savedLevels[currentLevelIndex];
+                        // Reiniciar nivel actual
                         startGame();
                     }
-                } else {
-                    // Reiniciar nivel actual
-                    startGame();
-                }
-            };
+                };
+            }
         }
 
         // ============================
@@ -3318,9 +3637,15 @@
         // SISTEMA DE MENSAJES
         // ============================
         function showMessage(title, text, autoHide = 3000) {
-            document.getElementById('message-title').textContent = title;
-            document.getElementById('message-text').innerHTML = text;
-            document.getElementById('message-modal').classList.add('active');
+            const messageTitle = document.getElementById('message-title');
+            const messageText = document.getElementById('message-text');
+            const messageModal = document.getElementById('message-modal');
+            
+            if (!messageTitle || !messageText || !messageModal) return;
+            
+            messageTitle.textContent = title;
+            messageText.innerHTML = text;
+            messageModal.classList.add('active');
 
             if (autoHide > 0) {
                 setTimeout(hideMessage, autoHide);
@@ -3328,8 +3653,11 @@
         }
 
         function hideMessage() {
-            document.getElementById('message-modal').classList.remove('active');
-            document.getElementById('levels-modal').classList.remove('active');
+            const messageModal = document.getElementById('message-modal');
+            const levelsModal = document.getElementById('levels-modal');
+            
+            if (messageModal) messageModal.classList.remove('active');
+            if (levelsModal) levelsModal.classList.remove('active');
         }
 
         // ============================
