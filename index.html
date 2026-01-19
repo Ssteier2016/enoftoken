@@ -395,6 +395,67 @@
             color: #94a3b8;
         }
 
+        /* Botón de compra en personajes bloqueados */
+        .buy-button {
+            background: linear-gradient(135deg, var(--success), #10b981);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .buy-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .buy-button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Botón JUGAR principal */
+        .play-button-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .play-button {
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        .play-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(220, 38, 38, 0.4);
+        }
+
+        .play-button:active {
+            transform: translateY(-2px);
+        }
+
         /* Configuración de nivel */
         .level-config {
             background: rgba(30, 41, 59, 0.7);
@@ -994,7 +1055,7 @@
             display: block;
         }
 
-        /* Tabla de highscore */
+        /* Tabla de highscore - AHORA EN MENÚ PRINCIPAL */
         .highscore-container {
             background: rgba(30, 41, 59, 0.7);
             border-radius: 15px;
@@ -1355,6 +1416,57 @@
         .touch-controls-overlay.active {
             display: block;
         }
+
+        /* Filtros para niveles */
+        .level-filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: rgba(220, 38, 38, 0.3);
+            border-color: var(--primary);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .level-type-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .level-type-ai {
+            background: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+
+        .level-type-custom {
+            background: rgba(139, 92, 246, 0.3);
+            color: #8b5cf6;
+            border: 1px solid #8b5cf6;
+        }
     </style>
 </head>
 <body>
@@ -1419,6 +1531,13 @@
             </div>
         </div>
 
+        <!-- Botón JUGAR principal -->
+        <div class="play-button-container">
+            <button class="play-button" onclick="startGameFromMenu()">
+                <i class="fas fa-play-circle"></i> JUGAR
+            </button>
+        </div>
+
         <!-- Menú oculto (sin contador de clics) -->
         <div class="menu-options hidden" id="hidden-menu-options">
             <div class="menu-card" onclick="showScreen('editor-screen')">
@@ -1436,14 +1555,6 @@
                 <h2>Niveles Guardados</h2>
                 <p>Gestiona y juega tus niveles creados. ¡Personaliza tu experiencia!</p>
             </div>
-
-            <div class="menu-card" onclick="showHighscoreTable()">
-                <div class="menu-icon">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <h2>Highscore Global</h2>
-                <p>Compara tus puntajes con jugadores de todo el mundo. ¡Llega a la cima!</p>
-            </div>
         </div>
 
         <!-- Personajes directamente en el menú principal -->
@@ -1458,8 +1569,8 @@
             </p>
         </div>
 
-        <!-- Tabla de highscore -->
-        <div class="highscore-container" id="highscore-container" style="display: none;">
+        <!-- Tabla de highscore - AHORA VISIBLE EN MENÚ PRINCIPAL -->
+        <div class="highscore-container">
             <h2 class="text-center mb-2">🏆 Highscore Global</h2>
             <div id="highscore-loading" class="text-center">
                 <p>Cargando puntajes...</p>
@@ -1479,11 +1590,6 @@
                     <!-- Los puntajes se cargarán aquí -->
                 </tbody>
             </table>
-            <div class="text-center mt-3">
-                <button class="btn btn-secondary" onclick="hideHighscoreTable()">
-                    <i class="fas fa-times"></i> Cerrar
-                </button>
-            </div>
         </div>
     </div>
 
@@ -1718,6 +1824,14 @@
 
     <div id="levels-modal" class="message">
         <h2>Niveles Guardados</h2>
+        
+        <!-- Filtros para niveles -->
+        <div class="level-filters">
+            <button class="filter-btn active" onclick="filterLevels('all')">Todos</button>
+            <button class="filter-btn" onclick="filterLevels('ai')">IA</button>
+            <button class="filter-btn" onclick="filterLevels('custom')">Personalizados</button>
+        </div>
+        
         <div id="levels-list" class="levels-list">
             <!-- Los niveles se cargarán aquí -->
         </div>
@@ -1795,7 +1909,7 @@
             [TILE_TYPES.AMMO]: 'municiones.png'
         };
 
-        // Personajes disponibles con precios (agregado Mario Bross, Spiderman y Scream)
+        // Personajes disponibles con precios (agregado los nuevos personajes)
         const CHARACTERS = [
             { 
                 id: 'civil', 
@@ -1964,6 +2078,49 @@
                 speed: 1.1, 
                 damage: 35, 
                 description: 'Asesino sigiloso con cuchillo' 
+            },
+            // NUEVOS PERSONAJES
+            { 
+                id: 'hulk', 
+                name: 'Hulk', 
+                image: 'hulk.png',
+                rifleImage: null,
+                shotgunImage: null,
+                swordImage: null,
+                price: 120,
+                premium: true,
+                health: 300, 
+                speed: 0.7, 
+                damage: 60, 
+                description: 'Gigante esmeralda con fuerza infinita' 
+            },
+            { 
+                id: 'ironman', 
+                name: 'Ironman', 
+                image: 'ironman.png',
+                rifleImage: null,
+                shotgunImage: null,
+                swordImage: null,
+                price: 110,
+                premium: true,
+                health: 200, 
+                speed: 1.0, 
+                damage: 40, 
+                description: 'Genio, multimillonario, playboy, filántropo' 
+            },
+            { 
+                id: 'tarzan', 
+                name: 'Tarzán', 
+                image: 'tarzan.png',
+                rifleImage: null,
+                shotgunImage: null,
+                swordImage: null,
+                price: 60,
+                premium: true,
+                health: 140, 
+                speed: 1.5, 
+                damage: 25, 
+                description: 'Rey de la jungla con agilidad sobrehumana' 
             }
         ];
 
@@ -2042,7 +2199,8 @@
             height: 10,
             name: 'Mi Nivel Personalizado',
             timeLimit: 120,
-            levelNumber: 1
+            levelNumber: 1,
+            levelType: 'custom' // 'ai' o 'custom'
         };
 
         let savedLevels = [];
@@ -2052,7 +2210,7 @@
             totalZombies: 0,
             currentLevel: 1,
             playerCoins: 0,
-            unlockedCharacters: ['civil', 'spiderman', 'scream'], // Desbloquear nuevos personajes
+            unlockedCharacters: ['civil', 'spiderman', 'scream'],
             playerName: 'Jugador' + Math.floor(Math.random() * 10000)
         };
 
@@ -2729,12 +2887,12 @@
             if (savedStats) {
                 gameStats = JSON.parse(savedStats);
                 // Asegurar que los nuevos personajes estén desbloqueados si ya estaban en stats anteriores
-                if (!gameStats.unlockedCharacters.includes('spiderman')) {
-                    gameStats.unlockedCharacters.push('spiderman');
-                }
-                if (!gameStats.unlockedCharacters.includes('scream')) {
-                    gameStats.unlockedCharacters.push('scream');
-                }
+                const defaultUnlocked = ['civil', 'spiderman', 'scream'];
+                defaultUnlocked.forEach(char => {
+                    if (!gameStats.unlockedCharacters.includes(char)) {
+                        gameStats.unlockedCharacters.push(char);
+                    }
+                });
             }
             updateStatsDisplay();
             updateCoinsDisplay();
@@ -2809,9 +2967,69 @@
                     globalHighscores.push({ id: doc.id, ...doc.data() });
                 });
                 
+                // Actualizar la tabla de highscore
+                updateHighscoreTable();
+                
                 console.log('Highscores cargados:', globalHighscores.length);
             } catch (error) {
                 console.error('Error cargando highscores:', error);
+            }
+        }
+
+        function updateHighscoreTable() {
+            const tableBody = document.getElementById('highscore-body');
+            const loading = document.getElementById('highscore-loading');
+            
+            if (!tableBody || !loading) return;
+            
+            if (globalHighscores.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center" style="color: #94a3b8;">
+                            No hay puntajes registrados todavía
+                        </td>
+                    </tr>
+                `;
+                loading.style.display = 'none';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            
+            globalHighscores.forEach((score, index) => {
+                const date = score.date ? new Date(score.date.seconds * 1000).toLocaleDateString() : 'Hoy';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="highscore-rank">
+                        ${index + 1}
+                        ${index < 3 ? getMedalEmoji(index) : ''}
+                    </td>
+                    <td class="highscore-name">${score.playerName}</td>
+                    <td>${score.character}</td>
+                    <td>${score.level}</td>
+                    <td class="highscore-score">${score.score.toLocaleString()}</td>
+                    <td style="color: #94a3b8; font-size: 0.9rem;">${date}</td>
+                `;
+                
+                // Destacar si es el jugador actual
+                if (score.playerName === gameStats.playerName) {
+                    row.style.backgroundColor = 'rgba(251, 191, 36, 0.1)';
+                    row.style.borderLeft = '3px solid var(--accent)';
+                }
+                
+                tableBody.appendChild(row);
+            });
+            
+            loading.style.display = 'none';
+        }
+
+        function getMedalEmoji(rank) {
+            switch(rank) {
+                case 0: return '🥇';
+                case 1: return '🥈';
+                case 2: return '🥉';
+                default: return '';
             }
         }
 
@@ -2870,68 +3088,6 @@
             return total;
         }
 
-        function showHighscoreTable() {
-            const container = document.getElementById('highscore-container');
-            const tableBody = document.getElementById('highscore-body');
-            const loading = document.getElementById('highscore-loading');
-            
-            container.style.display = 'block';
-            
-            if (globalHighscores.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="text-center" style="color: #94a3b8;">
-                            No hay puntajes registrados todavía
-                        </td>
-                    </tr>
-                `;
-                loading.style.display = 'none';
-                return;
-            }
-            
-            tableBody.innerHTML = '';
-            
-            globalHighscores.forEach((score, index) => {
-                const date = score.date ? new Date(score.date.seconds * 1000).toLocaleDateString() : 'Hoy';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="highscore-rank">
-                        ${index + 1}
-                        ${index < 3 ? getMedalEmoji(index) : ''}
-                    </td>
-                    <td class="highscore-name">${score.playerName}</td>
-                    <td>${score.character}</td>
-                    <td>${score.level}</td>
-                    <td class="highscore-score">${score.score.toLocaleString()}</td>
-                    <td style="color: #94a3b8; font-size: 0.9rem;">${date}</td>
-                `;
-                
-                // Destacar si es el jugador actual
-                if (score.playerName === gameStats.playerName) {
-                    row.style.backgroundColor = 'rgba(251, 191, 36, 0.1)';
-                    row.style.borderLeft = '3px solid var(--accent)';
-                }
-                
-                tableBody.appendChild(row);
-            });
-            
-            loading.style.display = 'none';
-        }
-
-        function getMedalEmoji(rank) {
-            switch(rank) {
-                case 0: return '🥇';
-                case 1: return '🥈';
-                case 2: return '🥉';
-                default: return '';
-            }
-        }
-
-        function hideHighscoreTable() {
-            document.getElementById('highscore-container').style.display = 'none';
-        }
-
         // ============================
         // MANEJO DE PANTALLAS
         // ============================
@@ -2948,7 +3104,6 @@
 
             // Ocultar modales
             hideMessage();
-            hideHighscoreTable();
             
             const inventoryModal = document.getElementById('inventory-modal');
             if (inventoryModal) inventoryModal.classList.remove('active');
@@ -2974,9 +3129,9 @@
                 case 'main-menu':
                     updateStatsDisplay();
                     updateCoinsDisplay();
-                    // Recargar highscores si no están cargados
-                    if (globalHighscores.length === 0) {
-                        loadGlobalHighscores();
+                    // Actualizar highscores si están cargados
+                    if (globalHighscores.length > 0) {
+                        updateHighscoreTable();
                     }
                     break;
                 case 'editor-screen':
@@ -3002,6 +3157,40 @@
                 }
                 // Sin mensaje para no dar pistas
             }
+        }
+
+        // ============================
+        // BOTÓN JUGAR PRINCIPAL
+        // ============================
+        function startGameFromMenu() {
+            if (!selectedCharacter) {
+                showMessage('Error', 'Debes seleccionar un personaje primero');
+                return;
+            }
+            
+            // Verificar si el personaje está desbloqueado
+            if (selectedCharacter.premium && !gameStats.unlockedCharacters.includes(selectedCharacter.id)) {
+                showMessage('Personaje Bloqueado', 
+                    `¡${selectedCharacter.name} está bloqueado! Necesitas ${selectedCharacter.price} monedas para desbloquearlo.`,
+                    3000);
+                return;
+            }
+            
+            // Determinar qué nivel jugar
+            // Si hay progreso guardado, continuar desde ahí, sino empezar desde el nivel 1
+            const savedProgress = localStorage.getItem('sandboxProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                currentLevelIndex = progress.currentLevel - 1;
+                if (currentLevelIndex >= savedLevels.length) {
+                    currentLevelIndex = 0;
+                }
+            } else {
+                currentLevelIndex = 0;
+            }
+            
+            currentLevel = savedLevels[currentLevelIndex];
+            showScreen('game-screen');
         }
 
         // ============================
@@ -3065,52 +3254,50 @@
                     ` : ''}
                 `;
 
-                // Configurar evento de clic
+                // Agregar botón de compra si es premium y no está desbloqueado
+                if (char.premium && !isUnlocked) {
+                    const buyButton = document.createElement('button');
+                    buyButton.className = 'buy-button';
+                    buyButton.innerHTML = `
+                        <i class="fas fa-shopping-cart"></i>
+                        COMPRAR (${char.price} <img src="moneda.png" alt="Monedas" style="width: 16px; height: 16px; vertical-align: middle;">)
+                    `;
+                    buyButton.onclick = (e) => {
+                        e.stopPropagation(); // Evitar que se seleccione el personaje
+                        buyCharacter(char);
+                    };
+                    
+                    // Deshabilitar botón si no hay suficientes monedas
+                    if (!canAfford) {
+                        buyButton.disabled = true;
+                        buyButton.title = `Necesitas ${char.price - gameStats.playerCoins} monedas más`;
+                    }
+                    
+                    card.appendChild(buyButton);
+                }
+
+                // Configurar evento de clic para seleccionar personaje
                 card.onclick = () => {
                     if (!isUnlocked && char.premium) {
-                        // Intentar comprar el personaje
-                        if (buyCharacter(char)) {
-                            // Si la compra fue exitosa, seleccionar el personaje
-                            document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
-                            card.classList.remove('locked');
-                            card.classList.add('available', 'selected');
-                            selectedCharacter = char;
-                        }
-                    } else if (isUnlocked || !char.premium) {
-                        // Seleccionar personaje desbloqueado o gratis
-                        document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
-                        card.classList.add('selected');
-                        selectedCharacter = char;
+                        // No hacer nada si está bloqueado (el botón de compra ya maneja esto)
+                        return;
                     }
+                    
+                    // Seleccionar personaje desbloqueado o gratis
+                    document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedCharacter = char;
                 };
 
                 // Añadir tooltip para personajes bloqueados
                 if (!isUnlocked && char.premium) {
-                    card.title = `Haz clic para comprar por ${char.price} monedas`;
+                    card.title = `Haz clic en COMPRAR para desbloquear por ${char.price} monedas`;
                 } else if (isUnlocked) {
                     card.title = `Haz clic para seleccionar`;
                 }
 
                 container.appendChild(card);
             });
-        }
-
-        function startSelectedLevel() {
-            if (!selectedCharacter) {
-                showMessage('Error', 'Debes seleccionar un personaje primero');
-                return;
-            }
-            
-            // Verificar si el personaje está desbloqueado
-            if (selectedCharacter.premium && !gameStats.unlockedCharacters.includes(selectedCharacter.id)) {
-                showMessage('Personaje Bloqueado', 
-                    `¡${selectedCharacter.name} está bloqueado! Necesitas ${selectedCharacter.price} monedas para desbloquearlo.`,
-                    3000);
-                return;
-            }
-            
-            // Mostrar lista de niveles para seleccionar
-            showLevelsToPlay();
         }
 
         function showLevelsToPlay() {
@@ -3134,7 +3321,13 @@
                         [TILE_TYPES.RIFLE, TILE_TYPES.SHOTGUN, TILE_TYPES.KEY, TILE_TYPES.COIN, TILE_TYPES.BOMB, TILE_TYPES.SWORD, TILE_TYPES.BULLET, TILE_TYPES.AMMO].includes(t)
                     ).length;
 
+                    // Determinar tipo de nivel
+                    const levelType = level.levelType || 'ai'; // Por defecto, niveles creados por la IA
+                    const typeClass = levelType === 'ai' ? 'level-type-ai' : 'level-type-custom';
+                    const typeText = levelType === 'ai' ? 'IA' : 'Personalizado';
+
                     levelCard.innerHTML = `
+                        <div class="level-type-badge ${typeClass}">${typeText}</div>
                         <h3>${level.name}</h3>
                         <p style="color: #94a3b8; font-size: 0.9rem; margin: 0.5rem 0;">
                             Nivel ${level.levelNumber || 1}<br>
@@ -3155,6 +3348,8 @@
             const levelsModal = document.getElementById('levels-modal');
             if (levelsModal) {
                 levelsModal.classList.add('active');
+                // Activar filtro "Todos" por defecto
+                filterLevels('all');
             }
         }
 
@@ -3301,7 +3496,8 @@
                 height: 10,
                 name: 'Mi Nivel Personalizado',
                 timeLimit: 120,
-                levelNumber: 1
+                levelNumber: 1,
+                levelType: 'custom'
             };
             
             // NO poner entrada y salida por defecto
@@ -3336,6 +3532,7 @@
             editorState.width = parseInt(boardSize.value);
             editorState.height = parseInt(boardSize.value);
             editorState.levelNumber = levelNumber;
+            editorState.levelType = 'custom'; // Niveles del editor son personalizados
             
             // Verificar que haya al menos una entrada y una salida
             const hasStart = editorState.grid.some(tile => tile === TILE_TYPES.START);
@@ -3357,6 +3554,7 @@
                 height: editorState.height,
                 timeLimit: editorState.timeLimit,
                 levelNumber: editorState.levelNumber,
+                levelType: editorState.levelType,
                 grid: [...editorState.grid]
             };
 
@@ -3367,20 +3565,42 @@
         }
 
         // ============================
-        // LISTA DE NIVELES
+        // LISTA DE NIVELES CON FILTROS
         // ============================
         function showLevels() {
+            showLevelsToPlay();
+        }
+
+        function filterLevels(filterType) {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            const activeButton = Array.from(filterButtons).find(btn => 
+                btn.textContent.toLowerCase().includes(filterType)
+            );
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+            
             const listContainer = document.getElementById('levels-list');
             if (!listContainer) return;
             
             listContainer.innerHTML = '';
 
-            if (savedLevels.length === 0) {
-                listContainer.innerHTML = '<p class="text-center" style="grid-column: 1 / -1; color: #94a3b8;">No hay niveles guardados</p>';
+            let filteredLevels = savedLevels;
+            
+            if (filterType === 'ai') {
+                filteredLevels = savedLevels.filter(level => level.levelType === 'ai' || !level.levelType);
+            } else if (filterType === 'custom') {
+                filteredLevels = savedLevels.filter(level => level.levelType === 'custom');
+            }
+            
+            // Ordenar niveles por número de nivel
+            const sortedLevels = [...filteredLevels].sort((a, b) => (a.levelNumber || 1) - (b.levelNumber || 1));
+            
+            if (sortedLevels.length === 0) {
+                listContainer.innerHTML = '<p class="text-center" style="grid-column: 1 / -1; color: #94a3b8;">No hay niveles de este tipo</p>';
             } else {
-                // Ordenar niveles por número de nivel
-                const sortedLevels = [...savedLevels].sort((a, b) => (a.levelNumber || 1) - (b.levelNumber || 1));
-                
                 sortedLevels.forEach((level, index) => {
                     const levelCard = document.createElement('div');
                     levelCard.className = 'level-card';
@@ -3390,7 +3610,13 @@
                         [TILE_TYPES.RIFLE, TILE_TYPES.SHOTGUN, TILE_TYPES.KEY, TILE_TYPES.COIN, TILE_TYPES.BOMB, TILE_TYPES.SWORD, TILE_TYPES.BULLET, TILE_TYPES.AMMO].includes(t)
                     ).length;
 
+                    // Determinar tipo de nivel
+                    const levelType = level.levelType || 'ai';
+                    const typeClass = levelType === 'ai' ? 'level-type-ai' : 'level-type-custom';
+                    const typeText = levelType === 'ai' ? 'IA' : 'Personalizado';
+
                     levelCard.innerHTML = `
+                        <div class="level-type-badge ${typeClass}">${typeText}</div>
                         <h3>${level.name}</h3>
                         <p style="color: #94a3b8; font-size: 0.9rem; margin: 0.5rem 0;">
                             Nivel ${level.levelNumber || 1}<br>
@@ -3413,11 +3639,6 @@
                     listContainer.appendChild(levelCard);
                 });
             }
-
-            const levelsModal = document.getElementById('levels-modal');
-            if (levelsModal) {
-                levelsModal.classList.add('active');
-            }
         }
 
         function editLevel(index) {
@@ -3431,7 +3652,8 @@
                 height: level.height,
                 name: level.name,
                 timeLimit: level.timeLimit,
-                levelNumber: level.levelNumber || 1
+                levelNumber: level.levelNumber || 1,
+                levelType: level.levelType || 'custom'
             };
             
             // Actualizar inputs
@@ -3461,7 +3683,7 @@
             if (levelsModal) {
                 levelsModal.classList.remove('active');
             }
-            showScreen('main-menu');
+            showScreen('game-screen');
         }
 
         function deleteLevel(index) {
@@ -4782,6 +5004,15 @@
                 // Ganar monedas por completar nivel
                 const coinsEarned = 10 + (currentLevelIndex + 1) * 5; // Más monedas en niveles más difíciles
                 gameStats.playerCoins += coinsEarned;
+                
+                // Guardar progreso
+                const progress = {
+                    currentLevel: currentLevelIndex + 2, // Siguiente nivel
+                    totalLevels: gameStats.totalLevels,
+                    playerCoins: gameStats.playerCoins
+                };
+                localStorage.setItem('sandboxProgress', JSON.stringify(progress));
+                
                 saveStats();
                 
                 // Guardar highscore en Firebase
@@ -4920,7 +5151,7 @@
         }
 
         // ============================
-        // CREACIÓN DE 10 NIVELES POR DEFECTO
+        // CREACIÓN DE 10 NIVELES POR DEFECTO (IA)
         // ============================
         function createDefaultLevels() {
             // Limpiar niveles existentes
@@ -4956,6 +5187,7 @@
                 height: 10,
                 timeLimit: 120,
                 levelNumber: 1,
+                levelType: 'ai',
                 grid: level1
             });
 
@@ -4998,6 +5230,7 @@
                 height: 12,
                 timeLimit: 150,
                 levelNumber: 2,
+                levelType: 'ai',
                 grid: level2
             });
 
@@ -5037,6 +5270,7 @@
                 height: 10,
                 timeLimit: 180,
                 levelNumber: 3,
+                levelType: 'ai',
                 grid: level3
             });
 
@@ -5078,6 +5312,7 @@
                 height: 12,
                 timeLimit: 200,
                 levelNumber: 4,
+                levelType: 'ai',
                 grid: level4
             });
 
@@ -5122,6 +5357,7 @@
                 height: 15,
                 timeLimit: 220,
                 levelNumber: 5,
+                levelType: 'ai',
                 grid: level5
             });
 
@@ -5167,6 +5403,7 @@
                 height: 15,
                 timeLimit: 240,
                 levelNumber: 6,
+                levelType: 'ai',
                 grid: level6
             });
 
@@ -5219,6 +5456,7 @@
                 height: 15,
                 timeLimit: 250,
                 levelNumber: 7,
+                levelType: 'ai',
                 grid: level7
             });
 
@@ -5278,6 +5516,7 @@
                 height: 15,
                 timeLimit: 260,
                 levelNumber: 8,
+                levelType: 'ai',
                 grid: level8
             });
 
@@ -5334,6 +5573,7 @@
                 height: 20,
                 timeLimit: 300,
                 levelNumber: 9,
+                levelType: 'ai',
                 grid: level9
             });
 
@@ -5400,6 +5640,7 @@
                 height: 20,
                 timeLimit: 350,
                 levelNumber: 10,
+                levelType: 'ai',
                 grid: level10
             });
 
