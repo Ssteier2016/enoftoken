@@ -35,6 +35,85 @@
             overflow-x: hidden;
         }
 
+        /* Carátula de video */
+        #video-intro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #intro-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .video-loading-bar {
+            width: 80%;
+            max-width: 500px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .video-loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .video-skip-btn {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .video-skip-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         /* Pantalla de carga */
         #loading-screen {
             position: fixed;
@@ -1029,6 +1108,26 @@
     </style>
 </head>
 <body>
+    <!-- Carátula de video -->
+    <div id="video-intro">
+        <div class="video-container">
+            <video id="intro-video" preload="auto" playsinline>
+                <source src="caratula.mp4" type="video/mp4">
+                Tu navegador no soporta el video.
+            </video>
+            <div class="video-overlay">
+                <h1 style="font-size: 4rem; color: white; text-shadow: 0 0 20px rgba(220, 38, 38, 0.8);">SANDBOX ARENA</h1>
+                <p style="font-size: 1.5rem; color: #fbbf24;">Cargando experiencia...</p>
+                <div class="video-loading-bar">
+                    <div id="video-loading-progress" class="video-loading-progress"></div>
+                </div>
+                <button class="video-skip-btn" onclick="skipIntro()">
+                    <i class="fas fa-forward"></i> Saltar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Pantalla de carga -->
     <div id="loading-screen">
         <div class="loading-container">
@@ -1484,7 +1583,7 @@
         // ============================
         // VARIABLES GLOBALES DEL JUEGO
         // ============================
-        let currentScreen = 'loading';
+        let currentScreen = 'video-intro';
         let selectedCharacter = null;
         let currentLevelIndex = 0;
         let currentLevel = null;
@@ -1561,6 +1660,79 @@
         // INICIALIZACIÓN
         // ============================
         document.addEventListener('DOMContentLoaded', async () => {
+            // Iniciar carátula de video
+            startVideoIntro();
+        });
+
+        function startVideoIntro() {
+            const video = document.getElementById('intro-video');
+            const videoIntro = document.getElementById('video-intro');
+            const loadingProgress = document.getElementById('video-loading-progress');
+            
+            // Intentar cargar el video
+            video.load();
+            
+            // Configurar eventos del video
+            video.onloadeddata = function() {
+                console.log('Video cargado, empezando...');
+                loadingProgress.style.width = '50%';
+                
+                // Intentar reproducir
+                video.play().then(() => {
+                    console.log('Video reproduciéndose');
+                    loadingProgress.style.width = '100%';
+                    
+                    // Cuando el video termine, ir a carga
+                    video.onended = function() {
+                        console.log('Video terminado, mostrando pantalla de carga');
+                        videoIntro.style.opacity = '0';
+                        setTimeout(() => {
+                            videoIntro.style.display = 'none';
+                            startLoadingScreen();
+                        }, 500);
+                    };
+                    
+                }).catch(error => {
+                    console.log('Error al reproducir video:', error);
+                    // Si hay error, saltar directamente
+                    skipIntro();
+                });
+            };
+            
+            video.onerror = function() {
+                console.log('Error cargando video, usando fallback');
+                skipIntro();
+            };
+            
+            // Configurar barra de progreso basada en tiempo de carga
+            video.onprogress = function() {
+                if (video.buffered.length > 0) {
+                    const loaded = video.buffered.end(0);
+                    const total = video.duration;
+                    if (total > 0) {
+                        const percent = (loaded / total) * 100;
+                        loadingProgress.style.width = Math.min(percent, 100) + '%';
+                    }
+                }
+            };
+            
+            // Configurar botón de saltar
+            document.querySelector('.video-skip-btn').onclick = skipIntro;
+        }
+
+        function skipIntro() {
+            const videoIntro = document.getElementById('video-intro');
+            videoIntro.style.opacity = '0';
+            setTimeout(() => {
+                videoIntro.style.display = 'none';
+                startLoadingScreen();
+            }, 300);
+        }
+
+        function startLoadingScreen() {
+            // Mostrar pantalla de carga
+            document.getElementById('loading-screen').style.display = 'flex';
+            
             // Cargar estadísticas
             loadStats();
             
@@ -1587,7 +1759,7 @@
 
             // Simular carga
             simulateLoading();
-        });
+        }
 
         function loadLevelConfig() {
             // Cargar configuración guardada
@@ -1984,7 +2156,7 @@
             editorState.name = name;
             editorState.timeLimit = parseInt(document.getElementById('editor-time').value) || 120;
             editorState.width = parseInt(document.getElementById('editor-board-size').value);
-            editorState.height = parseInt(document.getElementById('editor-board-size').value;
+            editorState.height = parseInt(document.getElementById('editor-board-size').value);
             
             const newLevel = {
                 name: editorState.name,
