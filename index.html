@@ -37,8 +37,6 @@
             --danger: #ef4444;
             --warning: #f59e0b;
             --premium: #8b5cf6;
-            --neon-green: #00ff00;
-            --neon-glow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
         }
 
         body {
@@ -50,8 +48,8 @@
             overflow: hidden;
         }
 
-        /* Carátula de video */
-        #video-intro {
+        /* Pantalla de inicio */
+        #start-screen {
             position: fixed;
             top: 0;
             left: 0;
@@ -63,96 +61,74 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.5s ease;
+            background-image: url('caratula.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
-        .video-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #intro-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .video-overlay {
+        .start-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             gap: 2rem;
+            padding: 1rem;
         }
 
-        .video-skip-btn {
-            position: absolute;
-            bottom: 2rem;
-            right: 2rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .video-skip-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Pantalla de carga (simplificada) */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--dark);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading-container {
-            text-align: center;
-            animation: fadeIn 1s ease;
-        }
-
-        .loading-logo {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, var(--primary), var(--danger));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
-            animation: pulse 2s infinite;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 50px rgba(220, 38, 38, 0.5);
-        }
-
-        .loading-logo h1 {
-            font-size: 2.5rem;
+        .start-title {
+            font-size: 3rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+            letter-spacing: 4px;
+            text-align: center;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(220, 38, 38, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .start-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .start-button {
+                padding: 0.8rem 2rem;
+                font-size: 1.2rem;
+            }
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(220, 38, 38, 0.4);
         }
 
         /* Menú principal */
@@ -509,13 +485,13 @@
             transform: scale(1.2);
         }
 
-        /* JOYSTICK VIRTUAL - RESPONSIVE */
+        /* JOYSTICK VIRTUAL - MÁS GRANDE */
         #joystick-container {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            width: 100px;
-            height: 100px;
+            width: 160px;
+            height: 160px;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
@@ -530,15 +506,15 @@
 
         @media (max-width: 768px) {
             #joystick-container {
-                width: 80px;
-                height: 80px;
+                width: 140px;
+                height: 140px;
                 bottom: 15px;
                 left: 15px;
             }
             
             #joystick-knob {
-                width: 45px !important;
-                height: 45px !important;
+                width: 70px !important;
+                height: 70px !important;
             }
             
             #touch-shoot-btn {
@@ -551,8 +527,8 @@
         }
 
         #joystick-knob {
-            width: 60px;
-            height: 60px;
+            width: 90px;
+            height: 90px;
             background: radial-gradient(circle at 30% 30%, #4b5563, #1f2937);
             border-radius: 50%;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
@@ -562,35 +538,32 @@
             border: 2px solid rgba(251, 191, 36, 0.3);
         }
 
-        /* Botón JUGAR principal - NEON VERDE */
+        /* Botón JUGAR principal */
         .play-button-container {
             text-align: center;
             margin: 1.5rem 0;
         }
 
         .play-button {
-            background: rgba(0, 0, 0, 0.8);
-            color: var(--neon-green);
-            border: 3px solid var(--neon-green);
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            color: white;
+            border: none;
             padding: 1rem 3rem;
-            border-radius: 15px;
-            font-size: 2rem;
-            font-weight: 900;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 1rem;
-            box-shadow: var(--neon-glow);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: var(--neon-glow);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
         }
 
         @media (max-width: 768px) {
             .play-button {
                 padding: 0.8rem 2rem;
-                font-size: 1.5rem;
+                font-size: 1.2rem;
                 width: 100%;
                 justify-content: center;
             }
@@ -598,8 +571,7 @@
 
         .play-button:hover {
             transform: translateY(-5px);
-            box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
-            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(220, 38, 38, 0.4);
         }
 
         .play-button:active {
@@ -840,17 +812,30 @@
             color: #94a3b8;
         }
 
-        /* Tablero de juego - RESPONSIVE */
+        /* Tablero de juego - OCUPA TODA LA PANTALLA */
         .game-board-container {
             position: fixed;
             top: 60px;
             left: 0;
             right: 0;
             bottom: 0;
-            overflow: auto;
+            overflow: hidden;
             z-index: 1;
-            touch-action: pan-x pan-y;
-            -webkit-overflow-scrolling: touch;
+            touch-action: pinch-zoom pan-x pan-y;
+            background: #0f172a;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 0px;
+            background: rgba(0, 0, 0, 0.3);
+            position: absolute;
+            transform-origin: 0 0;
+            transition: transform 0.1s ease;
+            justify-content: center;
+            align-content: center;
+            width: 100%;
+            height: 100%;
         }
 
         @media (max-width: 768px) {
@@ -858,48 +843,31 @@
                 top: 50px;
                 bottom: 0;
             }
-        }
-
-        .game-board {
-            display: grid;
-            gap: 1px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 5px;
-            border-radius: 10px;
-            position: absolute;
-            transform-origin: 0 0;
-            transition: transform 0.1s ease;
-            min-width: 100%;
-            min-height: 100%;
-        }
-
-        @media (max-width: 768px) {
+            
             .game-cell {
-                width: 35px !important;
-                height: 35px !important;
+                width: 50px !important;
+                height: 50px !important;
             }
         }
 
         @media (max-width: 480px) {
             .game-cell {
-                width: 30px !important;
-                height: 30px !important;
+                width: 45px !important;
+                height: 45px !important;
             }
         }
 
         .game-cell {
-            width: 40px;
-            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
             position: relative;
             transition: all 0.2s ease;
             background-size: cover;
             background-position: center;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
         }
 
         .game-cell.touch-active {
@@ -1514,34 +1482,107 @@
             border-left: 4px solid var(--accent);
         }
 
+        .level-info {
+            flex: 1;
+        }
+
         .level-actions {
             display: flex;
             gap: 0.5rem;
         }
 
         .level-action-btn {
-            padding: 0.25rem 0.5rem;
             background: rgba(255, 255, 255, 0.1);
             border: none;
-            border-radius: 5px;
             color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 5px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .level-action-btn:hover {
-            background: rgba(220, 38, 38, 0.5);
+            background: var(--primary);
         }
 
-        .level-action-btn.edit {
-            background: rgba(59, 130, 246, 0.5);
+        .level-action-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
         }
 
-        .level-action-btn.edit:hover {
-            background: rgba(59, 130, 246, 0.8);
+        .level-action-btn.delete:hover {
+            background: var(--danger);
         }
 
-        /* Modal de Nickname */
+        /* Barra deslizadora vertical */
+        .vertical-scroll-container {
+            position: fixed;
+            right: 10px;
+            top: 70px;
+            bottom: 100px;
+            width: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 10px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px 0;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .vertical-scroll-container {
+                display: flex;
+                right: 5px;
+                top: 60px;
+                bottom: 90px;
+            }
+        }
+
+        .scroll-btn {
+            width: 30px;
+            height: 30px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .scroll-track {
+            flex: 1;
+            width: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scroll-thumb {
+            position: absolute;
+            width: 100%;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .scroll-thumb:hover {
+            background: var(--danger);
+        }
+
+        /* Modal para nickname */
         .nickname-modal {
             position: fixed;
             top: 50%;
@@ -1550,8 +1591,8 @@
             background: rgba(15, 23, 42, 0.95);
             padding: 2rem;
             border-radius: 20px;
-            z-index: 2000;
             border: 2px solid var(--accent);
+            z-index: 2000;
             min-width: 300px;
             max-width: 90%;
             display: none;
@@ -1560,6 +1601,23 @@
         .nickname-modal.active {
             display: block;
             animation: popIn 0.3s ease;
+        }
+
+        .nickname-input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: rgba(15, 23, 42, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .nickname-input:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
         /* Animaciones */
@@ -1740,67 +1798,67 @@
             }
         }
 
-        /* Barra deslizadora para el tablero */
-        .game-board-container::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
-        }
-
-        .game-board-container::-webkit-scrollbar-track {
+        /* Modo editor de niveles */
+        .editor-board-container {
+            position: relative;
+            width: 100%;
+            min-height: 500px;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 6px;
+            border-radius: 10px;
+            overflow: auto;
+            padding: 1rem;
         }
 
-        .game-board-container::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 6px;
+        .editor-board {
+            display: grid;
+            gap: 0px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.5);
+            padding: 5px;
+            border-radius: 5px;
         }
 
-        .game-board-container::-webkit-scrollbar-thumb:hover {
-            background: var(--danger);
+        .editor-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .editor-cell:hover {
+            border-color: var(--accent);
+            transform: scale(1.1);
         }
     </style>
 </head>
 <body>
-    <!-- Carátula de video -->
-    <div id="video-intro">
-        <div class="video-container">
-            <video id="intro-video" preload="auto" playsinline muted>
-                <source src="caratula.mp4" type="video/mp4">
-                Tu navegador no soporta el video.
-            </video>
-            <div class="video-overlay">
-                <h1 style="font-size: 3rem; color: white; text-shadow: 0 0 20px rgba(220, 38, 38, 0.8);">SANDBOX ARENA</h1>
-                <p style="font-size: 1.2rem; color: #fbbf24;">Cargando experiencia...</p>
-                <button class="video-skip-btn" onclick="skipIntro()">
-                    <i class="fas fa-forward"></i> Saltar
-                </button>
-            </div>
+    <!-- Pantalla de inicio -->
+    <div id="start-screen">
+        <div class="start-overlay">
+            <h1 class="start-title">SANDBOX ARENA</h1>
+            <button class="start-button" onclick="startGameFromHome()">
+                <i class="fas fa-play"></i> EMPEZAR
+            </button>
         </div>
     </div>
 
-    <!-- Pantalla de carga simplificada -->
-    <div id="loading-screen">
-        <div class="loading-container">
-            <div class="loading-logo">
-                <h1>SA</h1>
-            </div>
-            <h2>SANDBOX ARENA</h2>
-            <p id="loading-text" class="loading-text">Iniciando arena...</p>
-        </div>
-    </div>
-
-    <!-- Modal de Nickname -->
+    <!-- Modal para nickname -->
     <div id="nickname-modal" class="nickname-modal">
-        <h2 style="color: var(--accent); margin-bottom: 1rem;">¡BIENVENIDO A SANDBOX ARENA!</h2>
-        <p style="margin-bottom: 1.5rem; color: #cbd5e1;">
-            Ingresa tu nickname para competir en el Highscore global:
+        <h2 class="text-center mb-2">¡BIENVENIDO!</h2>
+        <p class="text-center mb-3" style="color: #94a3b8;">
+            Ingresa tu nickname para aparecer en el Highscore
         </p>
-        <input type="text" id="player-nickname" class="config-input mb-2" 
-               placeholder="Tu nickname (máx. 15 caracteres)" maxlength="15">
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-            <button class="btn btn-primary" onclick="saveNickname()" style="flex: 1;">
-                <i class="fas fa-check"></i> Continuar
+        <input type="text" id="nickname-input" class="nickname-input" 
+               placeholder="Tu nickname" maxlength="20">
+        <div class="text-center mt-3">
+            <button class="btn btn-primary" onclick="saveNickname()">
+                <i class="fas fa-save"></i> Guardar y Jugar
             </button>
         </div>
     </div>
@@ -1823,7 +1881,7 @@
                 <div class="stat-label-large">Máximo de Monedas</div>
             </div>
             <div class="stat-box">
-                <div class="stat-number" id="total-levels">1</div>
+                <div class="stat-number" id="total-levels">0</div>
                 <div class="stat-label-large">Niveles Completados</div>
             </div>
             <div class="stat-box">
@@ -1857,11 +1915,30 @@
             </p>
         </div>
 
-        <!-- Botón JUGAR principal - NEON VERDE -->
+        <!-- Botón JUGAR principal -->
         <div class="play-button-container">
             <button class="play-button" onclick="startGameFromMenu()">
                 <i class="fas fa-play-circle"></i> JUGAR
             </button>
+        </div>
+
+        <!-- Opciones del menú -->
+        <div class="menu-options">
+            <div class="menu-card" onclick="showScreen('editor-screen')">
+                <div class="menu-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h2>Modo Cerebro</h2>
+                <p>Diseña tus propios escenarios de supervivencia con bloques. Crea desafíos mortales.</p>
+            </div>
+            
+            <div class="menu-card" onclick="loadLevelsModal()">
+                <div class="menu-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <h2>Niveles Guardados</h2>
+                <p>Gestiona tus niveles personalizados. Edita, elimina o juega tus creaciones.</p>
+            </div>
         </div>
 
         <!-- Tabla de highscore -->
@@ -1886,19 +1963,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Botón Modo Cerebro (oculto hasta hacer clic 7 veces en título) -->
-        <div class="hidden" id="hidden-menu-options">
-            <div class="menu-options">
-                <div class="menu-card" onclick="showScreen('editor-screen')">
-                    <div class="menu-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <h2>Modo Cerebro</h2>
-                    <p>Diseña tus propios escenarios de supervivencia con bloques. Crea desafíos mortales.</p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Editor de niveles -->
@@ -1912,6 +1976,9 @@
             </button>
             <button class="editor-action-btn" onclick="loadLevelsModal()">
                 <i class="fas fa-list"></i> Niveles Guardados
+            </button>
+            <button class="editor-action-btn" onclick="playCurrentLevel()">
+                <i class="fas fa-play"></i> Jugar
             </button>
             <button class="editor-action-btn" onclick="showScreen('main-menu')">
                 <i class="fas fa-home"></i> Menú
@@ -1958,8 +2025,10 @@
                 <!-- Las herramientas se cargarán aquí -->
             </div>
 
-            <div class="game-board" id="editor-board">
-                <!-- El tablero del editor se generará aquí -->
+            <div class="editor-board-container">
+                <div class="editor-board" id="editor-board">
+                    <!-- El tablero del editor se generará aquí -->
+                </div>
             </div>
         </div>
     </div>
@@ -1986,6 +2055,19 @@
         <div class="fullscreen-buttons">
             <button class="fullscreen-btn" onclick="toggleFullscreen()" id="fullscreen-btn">
                 <i class="fas fa-expand"></i> Pantalla Completa
+            </button>
+        </div>
+
+        <!-- Barra deslizadora vertical -->
+        <div class="vertical-scroll-container">
+            <button class="scroll-btn" onclick="scrollUp()">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+            <div class="scroll-track" id="scroll-track">
+                <div class="scroll-thumb" id="scroll-thumb"></div>
+            </div>
+            <button class="scroll-btn" onclick="scrollDown()">
+                <i class="fas fa-chevron-down"></i>
             </button>
         </div>
 
@@ -2070,7 +2152,7 @@
             Zoom: <span id="zoom-level">100%</span>
         </div>
 
-        <!-- JOYSTICK VIRTUAL -->
+        <!-- JOYSTICK VIRTUAL (MÁS GRANDE) -->
         <div id="joystick-container"></div>
         <div id="joystick-knob"></div>
 
@@ -2079,7 +2161,7 @@
             <i class="fas fa-burst"></i>
         </div>
 
-        <!-- Contenedor del tablero de juego - AHORA CON SCROLL -->
+        <!-- Contenedor del tablero de juego (OCUPA TODA LA PANTALLA) -->
         <div class="game-board-container" id="game-board-container">
             <div class="game-board" id="game-board">
                 <!-- El tablero de juego se generará aquí -->
@@ -2122,7 +2204,6 @@
         <h2>Niveles Guardados</h2>
         <div class="level-filters">
             <button class="filter-btn active" onclick="filterLevels('all')">Todos</button>
-            <button class="filter-btn" onclick="filterLevels('ai')">IA</button>
             <button class="filter-btn" onclick="filterLevels('custom')">Personalizados</button>
         </div>
         
@@ -2217,7 +2298,7 @@
                 price: 0,
                 premium: false,
                 health: 100, 
-                speed: 1.0, 
+                speed: 0.5, // LA MITAD DE RÁPIDO
                 damage: 10,
                 description: 'Ciudadano común con instinto de supervivencia. Puede pasar por pastizales.',
                 special: 'Puede pasar por pastizales'
@@ -2229,7 +2310,7 @@
                 price: 150,
                 premium: true,
                 health: 120, 
-                speed: 1.5, 
+                speed: 0.75, // LA MITAD DE RÁPIDO
                 damage: 30,
                 description: '¡Pika pika! Pokémon eléctrico con ataques rápidos y descargas eléctricas.',
                 special: 'Ataques eléctricos que paralizan zombies'
@@ -2241,7 +2322,7 @@
                 price: 150,
                 premium: true,
                 health: 200, 
-                speed: 1.1, 
+                speed: 0.55, // LA MITAD DE RÁPIDO
                 damage: 40,
                 description: 'El caballero oscuro, maestro del combate y el sigilo. Inmune a cactus.',
                 special: 'Inmune a cactus'
@@ -2253,7 +2334,7 @@
                 price: 200,
                 premium: true,
                 health: 300, 
-                speed: 1.3, 
+                speed: 0.65, // LA MITAD DE RÁPIDO
                 damage: 60,
                 description: 'El hombre de acero, invulnerable y superpoderoso. Puede volar sobre agua.',
                 special: 'Puede volar sobre agua sin daño'
@@ -2266,7 +2347,7 @@
                 price: 250,
                 premium: true,
                 health: 180, 
-                speed: 1.4, 
+                speed: 0.7, // LA MITAD DE RÁPIDO
                 damage: 45,
                 description: 'El vampiro inmortal. Se regenera con el tiempo y puede convertir zombies.',
                 special: 'Regeneración de salud'
@@ -2278,7 +2359,7 @@
                 price: 300,
                 premium: true,
                 health: 400, 
-                speed: 2.0, 
+                speed: 1.0, // LA MITAD DE RÁPIDO
                 damage: 80,
                 description: 'El guerrero Saiyan. Kamehameha que destruye múltiples enemigos a la vez.',
                 special: 'Ataque en área grande'
@@ -2290,7 +2371,7 @@
                 price: 280,
                 premium: true,
                 health: 500, 
-                speed: 0.8, 
+                speed: 0.4, // LA MITAD DE RÁPIDO
                 damage: 100,
                 description: '¡Hulk aplasta! Fuerza descomunal pero velocidad reducida.',
                 special: 'Puede romper rocas'
@@ -2302,7 +2383,7 @@
                 price: 200,
                 premium: true,
                 health: 250, 
-                speed: 1.6, 
+                speed: 0.8, // LA MITAD DE RÁPIDO
                 damage: 55,
                 description: 'Bestia nocturna con garras afiladas. Más fuerte durante la noche.',
                 special: 'Daño extra en niveles oscuros'
@@ -2314,7 +2395,7 @@
                 price: 350,
                 premium: true,
                 health: 220, 
-                speed: 1.7, 
+                speed: 0.85, // LA MITAD DE RÁPIDO
                 damage: 65,
                 description: 'Tony Stark con armadura tecnológica. Disparos de repulsores y vuelo.',
                 special: 'Puede volar sobre obstáculos'
@@ -2326,7 +2407,7 @@
                 price: 180,
                 premium: true,
                 health: 150, 
-                speed: 1.3, 
+                speed: 0.65, // LA MITAD DE RÁPIDO
                 damage: 35,
                 description: '¡Its-a me, Mario! Salta alto y puede romper cajas con la cabeza.',
                 special: 'Puede saltar sobre obstáculos'
@@ -2334,26 +2415,26 @@
             { 
                 id: 'rambo', 
                 name: 'Rambo', 
-                image: 'rambo.png',
+                image: 'rambo.png', // Cambiado a rambo.png
                 price: 320,
                 premium: true,
                 health: 280, 
-                speed: 1.2, 
+                speed: 0.6, // LA MITAD DE RÁPIDO
                 damage: 75,
-                description: 'Soldado de élite con cuchillo de supervivencia. Experto en combate cuerpo a cuerpo.',
+                description: 'Soldado de élite. Munición infinita al comenzar.',
                 special: 'Munición infinita inicial'
             },
             { 
                 id: 'ramborifle', 
                 name: 'Rambo Rifle', 
-                image: 'ramborifle.png',
+                image: 'ramborifle.png', // Nuevo personaje
                 price: 350,
                 premium: true,
-                health: 300, 
-                speed: 1.1, 
-                damage: 90,
-                description: 'Rambo con rifle automático. Letal a larga distancia con munición infinita.',
-                special: 'Rifle automático con munición infinita'
+                health: 250, 
+                speed: 0.55, // LA MITAD DE RÁPIDO
+                damage: 85,
+                description: 'Rambo con rifle automático. Mayor precisión y daño.',
+                special: 'Rifle automático con mayor daño'
             },
             { 
                 id: 'robot', 
@@ -2362,7 +2443,7 @@
                 price: 220,
                 premium: true,
                 health: 200, 
-                speed: 1.0, 
+                speed: 0.5, // LA MITAD DE RÁPIDO
                 damage: 50,
                 description: 'Máquina de combate con visión infrarroja. Detecta zombies ocultos.',
                 special: 'Detecta zombies ocultos'
@@ -2374,7 +2455,7 @@
                 price: 270,
                 premium: true,
                 health: 190, 
-                speed: 1.5, 
+                speed: 0.75, // LA MITAD DE RÁPIDO
                 damage: 70,
                 description: 'Guerrero japonés con katana legendaria. Cortes rápidos y precisos.',
                 special: 'Cortes más rápidos'
@@ -2386,7 +2467,7 @@
                 price: 230,
                 premium: true,
                 health: 170, 
-                speed: 1.4, 
+                speed: 0.7, // LA MITAD DE RÁPIDO
                 damage: 60,
                 description: 'Asesino enmascarado con cuchillo. Movimientos sigilosos y sorpresa.',
                 special: 'Movimiento silencioso'
@@ -2398,7 +2479,7 @@
                 price: 290,
                 premium: true,
                 health: 210, 
-                speed: 1.8, 
+                speed: 0.9, // LA MITAD DE RÁPIDO
                 damage: 55,
                 description: 'El trepamuros. Se mueve por las paredes y lanza telarañas.',
                 special: 'Puede trepar paredes'
@@ -2410,7 +2491,7 @@
                 price: 190,
                 premium: true,
                 health: 230, 
-                speed: 1.7, 
+                speed: 0.85, // LA MITAD DE RÁPIDO
                 damage: 65,
                 description: 'Rey de la jungla. Se mueve rápido entre árboles y pastizales.',
                 special: 'Velocidad extra en pastizales'
@@ -2422,7 +2503,7 @@
                 price: 400,
                 premium: true,
                 health: 350, 
-                speed: 1.1, 
+                speed: 0.55, // LA MITAD DE RÁPIDO
                 damage: 85,
                 description: 'Máquina de guerra del futuro. Resistencia extrema y armas pesadas.',
                 special: 'Resistencia al daño'
@@ -2434,7 +2515,7 @@
                 price: 150,
                 premium: true,
                 health: 160, 
-                speed: 1.9, 
+                speed: 0.95, // LA MITAD DE RÁPIDO
                 damage: 40,
                 description: 'Maestro del sigilo y las artes marciales. Movimientos rápidos.',
                 special: 'Velocidad máxima'
@@ -2446,7 +2527,7 @@
                 price: 100,
                 premium: true,
                 health: 180, 
-                speed: 1.8, 
+                speed: 0.9, // LA MITAD DE RÁPIDO
                 damage: 60,
                 description: 'Ninja especializado en espadas. Corte rápido y preciso.',
                 special: 'Espada automática'
@@ -2458,7 +2539,7 @@
                 price: 120,
                 premium: true,
                 health: 170, 
-                speed: 1.7, 
+                speed: 0.85, // LA MITAD DE RÁPIDO
                 damage: 70,
                 description: 'Ninja con escopeta. Combina sigilo con poder de fuego.',
                 special: 'Shotgun automática'
@@ -2468,7 +2549,7 @@
         // ============================
         // VARIABLES GLOBALES DEL JUEGO
         // ============================
-        let currentScreen = 'video-intro';
+        let currentScreen = 'start-screen';
         let selectedCharacter = null;
         let currentLevelIndex = 0;
         let currentLevel = null;
@@ -2516,12 +2597,15 @@
             carouselCurrentX: 0,
             isDraggingCarousel: false,
             // Variables para zoom y cámara
-            zoomLevel: 1.0,
+            zoomLevel: 2.0, // ZOOM INICIAL MÁS CERCANO
             cameraX: 0,
             cameraY: 0,
             // Variables para agua
             lastWaterDamageTime: 0,
-            waterDamageInterval: 3000 // 3 segundos
+            waterDamageInterval: 3000, // 3 segundos
+            // Variables para gravedad de cajas
+            boxes: [],
+            boxFallTimer: null
         };
 
         let editorState = {
@@ -2546,7 +2630,7 @@
             playerCoins: 0,
             unlockedCharacters: ['civil'],
             playerName: '',
-            nicknameSet: false
+            hasNickname: false
         };
 
         // Variables para carrusel
@@ -2559,8 +2643,7 @@
         let joystickStartY = 0;
         let joystickMoveX = 0;
         let joystickMoveY = 0;
-        const joystickMaxRadius = 40;
-        let joystickInterval = null;
+        const joystickMaxRadius = 60; // RADIO MÁS GRANDE
 
         // Variables para zoom con pellizco
         let initialPinchDistance = null;
@@ -2577,21 +2660,6 @@
         // INICIALIZACIÓN
         // ============================
         document.addEventListener('DOMContentLoaded', async () => {
-            skipIntro();
-        });
-
-        function skipIntro() {
-            const videoIntro = document.getElementById('video-intro');
-            videoIntro.style.opacity = '0';
-            setTimeout(() => {
-                videoIntro.style.display = 'none';
-                startLoadingScreen();
-            }, 300);
-        }
-
-        function startLoadingScreen() {
-            document.getElementById('loading-screen').style.display = 'flex';
-            
             loadStats();
             
             const saved = localStorage.getItem('sandboxLevels');
@@ -2599,8 +2667,10 @@
                 savedLevels = JSON.parse(saved);
             }
             
+            // Verificar si hay niveles guardados
             if (savedLevels.length === 0) {
-                createDefaultLevels();
+                // No crear niveles por defecto - el usuario debe crear el primero
+                showMessage('¡Bienvenido!', 'No hay niveles creados aún. Ve al Modo Cerebro para crear tu primer nivel.', 5000);
             }
 
             initializeEditor();
@@ -2609,50 +2679,21 @@
             setupTouchControls();
             setupJoystick();
             setupZoomControls();
+            setupVerticalScroll();
             loadGlobalHighscores();
             setupFullscreen();
             updateCoinsDisplay();
-
-            // Carga inmediata sin barra de progreso
+            
+            // Verificar si necesita nickname
             setTimeout(() => {
-                document.getElementById('loading-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = 'none';
-                    if (!gameStats.nicknameSet) {
-                        showNicknameModal();
-                    } else {
-                        showScreen('main-menu');
-                    }
-                }, 500);
+                if (!gameStats.hasNickname) {
+                    showNicknameModal();
+                }
             }, 1000);
-        }
+        });
 
-        function showNicknameModal() {
-            const nicknameModal = document.getElementById('nickname-modal');
-            if (nicknameModal) {
-                nicknameModal.classList.add('active');
-            }
-        }
-
-        function saveNickname() {
-            const nicknameInput = document.getElementById('player-nickname');
-            if (!nicknameInput) return;
-            
-            const nickname = nicknameInput.value.trim();
-            if (nickname.length < 1 || nickname.length > 15) {
-                showMessage('Error', 'El nickname debe tener entre 1 y 15 caracteres', 2000);
-                return;
-            }
-            
-            gameStats.playerName = nickname;
-            gameStats.nicknameSet = true;
-            saveStats();
-            
-            const nicknameModal = document.getElementById('nickname-modal');
-            if (nicknameModal) {
-                nicknameModal.classList.remove('active');
-            }
-            
+        function startGameFromHome() {
+            document.getElementById('start-screen').style.display = 'none';
             showScreen('main-menu');
         }
 
@@ -2706,7 +2747,7 @@
         }
 
         // ============================
-        // SISTEMA DE ZOOM Y CÁMARA MEJORADO
+        // SISTEMA DE ZOOM Y CÁMARA
         // ============================
         function setupZoomControls() {
             const gameBoardContainer = document.getElementById('game-board-container');
@@ -2797,36 +2838,22 @@
             if (!container) return;
 
             const containerRect = container.getBoundingClientRect();
-            const cellSize = 40; // Tamaño de celda base
+            const cellSize = 50; // Tamaño de celda base ajustado
             
             // Calcular posición del jugador en píxeles
             const playerPixelX = gameState.player.x * cellSize * gameState.zoomLevel;
             const playerPixelY = gameState.player.y * cellSize * gameState.zoomLevel;
             
-            // Calcular centro del contenedor
-            const centerX = containerRect.width / 2;
-            const centerY = containerRect.height / 2;
-            
             // Calcular desplazamiento para centrar al jugador
-            gameState.cameraX = centerX - playerPixelX;
-            gameState.cameraY = centerY - playerPixelY;
+            gameState.cameraX = containerRect.width / 2 - playerPixelX;
+            gameState.cameraY = containerRect.height / 2 - playerPixelY;
             
             // Limitar la cámara para que no se salga del tablero
             const boardWidth = gameState.width * cellSize * gameState.zoomLevel;
             const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
             
-            // Asegurar que la cámara no muestre áreas fuera del tablero
-            if (boardWidth > containerRect.width) {
-                gameState.cameraX = Math.min(0, Math.max(containerRect.width - boardWidth, gameState.cameraX));
-            } else {
-                gameState.cameraX = (containerRect.width - boardWidth) / 2;
-            }
-            
-            if (boardHeight > containerRect.height) {
-                gameState.cameraY = Math.min(0, Math.max(containerRect.height - boardHeight, gameState.cameraY));
-            } else {
-                gameState.cameraY = (containerRect.height - boardHeight) / 2;
-            }
+            gameState.cameraX = Math.max(containerRect.width - boardWidth, Math.min(0, gameState.cameraX));
+            gameState.cameraY = Math.max(containerRect.height - boardHeight, Math.min(0, gameState.cameraY));
             
             // Aplicar transformación de cámara
             gameBoard.style.left = `${gameState.cameraX}px`;
@@ -2843,7 +2870,170 @@
         }
 
         // ============================
-        // SISTEMA DE JOYSTICK VIRTUAL
+        // BARRA DESLIZADORA VERTICAL
+        // ============================
+        function setupVerticalScroll() {
+            const scrollTrack = document.getElementById('scroll-track');
+            const scrollThumb = document.getElementById('scroll-thumb');
+            
+            if (!scrollTrack || !scrollThumb) return;
+            
+            let isDragging = false;
+            let startY = 0;
+            let startTop = 0;
+            
+            // Eventos para el thumb
+            scrollThumb.addEventListener('mousedown', startDrag);
+            scrollThumb.addEventListener('touchstart', startDragTouch);
+            
+            // Eventos para el track (hacer clic para mover)
+            scrollTrack.addEventListener('mousedown', trackClick);
+            scrollTrack.addEventListener('touchstart', trackClickTouch);
+            
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                startY = e.clientY || e.touches[0].clientY;
+                startTop = parseInt(scrollThumb.style.top) || 0;
+                
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('touchmove', doDragTouch);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+            
+            function startDragTouch(e) {
+                startDrag(e);
+            }
+            
+            function doDrag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const y = e.clientY || e.touches[0].clientY;
+                const deltaY = y - startY;
+                const trackHeight = scrollTrack.clientHeight - scrollThumb.clientHeight;
+                let newTop = startTop + deltaY;
+                
+                newTop = Math.max(0, Math.min(trackHeight, newTop));
+                scrollThumb.style.top = `${newTop}px`;
+                
+                // Calcular posición de cámara basada en scroll
+                const scrollPercentage = newTop / trackHeight;
+                updateCameraFromScroll(scrollPercentage);
+            }
+            
+            function doDragTouch(e) {
+                doDrag(e);
+            }
+            
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', doDrag);
+                document.removeEventListener('touchmove', doDragTouch);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+            
+            function trackClick(e) {
+                const rect = scrollTrack.getBoundingClientRect();
+                const y = e.clientY - rect.top;
+                const thumbHeight = scrollThumb.clientHeight;
+                const trackHeight = scrollTrack.clientHeight;
+                
+                let newTop = y - thumbHeight / 2;
+                newTop = Math.max(0, Math.min(trackHeight - thumbHeight, newTop));
+                scrollThumb.style.top = `${newTop}px`;
+                
+                const scrollPercentage = newTop / (trackHeight - thumbHeight);
+                updateCameraFromScroll(scrollPercentage);
+            }
+            
+            function trackClickTouch(e) {
+                trackClick(e);
+            }
+        }
+
+        function scrollUp() {
+            const container = document.getElementById('game-board-container');
+            if (!container) return;
+            
+            const cellSize = 50;
+            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
+            const containerHeight = container.clientHeight;
+            
+            if (boardHeight > containerHeight) {
+                gameState.cameraY = Math.min(0, gameState.cameraY + 100);
+                const gameBoard = document.getElementById('game-board');
+                if (gameBoard) {
+                    gameBoard.style.top = `${gameState.cameraY}px`;
+                }
+                updateScrollThumb();
+            }
+        }
+
+        function scrollDown() {
+            const container = document.getElementById('game-board-container');
+            if (!container) return;
+            
+            const cellSize = 50;
+            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
+            const containerHeight = container.clientHeight;
+            
+            if (boardHeight > containerHeight) {
+                gameState.cameraY = Math.max(containerHeight - boardHeight, gameState.cameraY - 100);
+                const gameBoard = document.getElementById('game-board');
+                if (gameBoard) {
+                    gameBoard.style.top = `${gameState.cameraY}px`;
+                }
+                updateScrollThumb();
+            }
+        }
+
+        function updateCameraFromScroll(scrollPercentage) {
+            const container = document.getElementById('game-board-container');
+            if (!container) return;
+            
+            const cellSize = 50;
+            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
+            const containerHeight = container.clientHeight;
+            
+            if (boardHeight > containerHeight) {
+                const maxScroll = containerHeight - boardHeight;
+                gameState.cameraY = maxScroll * scrollPercentage;
+                
+                const gameBoard = document.getElementById('game-board');
+                if (gameBoard) {
+                    gameBoard.style.top = `${gameState.cameraY}px`;
+                }
+            }
+        }
+
+        function updateScrollThumb() {
+            const scrollThumb = document.getElementById('scroll-thumb');
+            const scrollTrack = document.getElementById('scroll-track');
+            
+            if (!scrollThumb || !scrollTrack) return;
+            
+            const container = document.getElementById('game-board-container');
+            if (!container) return;
+            
+            const cellSize = 50;
+            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
+            const containerHeight = container.clientHeight;
+            
+            if (boardHeight > containerHeight) {
+                const trackHeight = scrollTrack.clientHeight - scrollThumb.clientHeight;
+                const scrollRange = boardHeight - containerHeight;
+                const currentScroll = -gameState.cameraY;
+                const thumbPosition = (currentScroll / scrollRange) * trackHeight;
+                
+                scrollThumb.style.top = `${Math.max(0, Math.min(trackHeight, thumbPosition))}px`;
+            }
+        }
+
+        // ============================
+        // SISTEMA DE JOYSTICK VIRTUAL (MÁS GRANDE)
         // ============================
         function setupJoystick() {
             const joystickContainer = document.getElementById('joystick-container');
@@ -2877,11 +3067,6 @@
                 gameState.joystickDirection = { x: 0, y: 0 };
                 gameState.joystickVelocity = { x: 0, y: 0 };
                 
-                if (joystickInterval) {
-                    clearInterval(joystickInterval);
-                    joystickInterval = null;
-                }
-                
                 if (touchOverlay) touchOverlay.classList.remove('active');
             }
 
@@ -2909,15 +3094,15 @@
                 };
                 
                 // Velocidad basada en la distancia (más lejos = más rápido)
-                const speedMultiplier = selectedCharacter ? selectedCharacter.speed : 1.0;
+                const speedMultiplier = selectedCharacter ? selectedCharacter.speed : 0.5;
                 gameState.joystickVelocity = {
-                    x: gameState.joystickDirection.x * 5 * speedMultiplier,
-                    y: gameState.joystickDirection.y * 5 * speedMultiplier
+                    x: gameState.joystickDirection.x * 3 * speedMultiplier, // REDUCIDA A LA MITAD
+                    y: gameState.joystickDirection.y * 3 * speedMultiplier  // REDUCIDA A LA MITAD
                 };
                 
-                // Iniciar movimiento si no está activo
-                if (!joystickInterval) {
-                    joystickInterval = setInterval(moveWithJoystick, 100);
+                // Mover jugador inmediatamente
+                if (gameState.playing && !gameState.paused) {
+                    moveWithJoystick();
                 }
             }
 
@@ -2993,7 +3178,7 @@
                                 <div class="carousel-stat-label">Salud</div>
                             </div>
                             <div class="carousel-stat">
-                                <div class="carousel-stat-value">${character.speed.toFixed(1)}</div>
+                                <div class="carousel-stat-value">${character.speed.toFixed(2)}</div>
                                 <div class="carousel-stat-label">Velocidad</div>
                             </div>
                             <div class="carousel-stat">
@@ -3366,22 +3551,6 @@
             }
         }
 
-        async function submitHighscore(scoreData) {
-            try {
-                await db.collection('highscores').add({
-                    playerName: gameStats.playerName,
-                    character: selectedCharacter.name,
-                    level: currentLevelIndex + 1,
-                    score: gameState.coins,
-                    date: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                loadGlobalHighscores();
-            } catch (error) {
-                console.error('Error enviando highscore:', error);
-            }
-        }
-
         function updateHighscoreTable() {
             const tableBody = document.getElementById('highscore-body');
             const loading = document.getElementById('highscore-loading');
@@ -3438,11 +3607,74 @@
             }
         }
 
+        async function submitHighscore(score, level, character) {
+            if (!gameStats.playerName || gameStats.playerName.trim() === '') {
+                return;
+            }
+            
+            try {
+                await db.collection('highscores').add({
+                    playerName: gameStats.playerName,
+                    character: character,
+                    level: level,
+                    score: score,
+                    date: firebase.firestore.FieldValue.serverTimestamp(),
+                    coins: gameState.coins
+                });
+                
+                loadGlobalHighscores();
+            } catch (error) {
+                console.error('Error enviando highscore:', error);
+            }
+        }
+
+        // ============================
+        // NICKNAME MODAL
+        // ============================
+        function showNicknameModal() {
+            const modal = document.getElementById('nickname-modal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function saveNickname() {
+            const input = document.getElementById('nickname-input');
+            if (!input) return;
+            
+            const nickname = input.value.trim();
+            if (nickname === '') {
+                showMessage('Error', 'Por favor ingresa un nickname');
+                return;
+            }
+            
+            if (nickname.length < 3) {
+                showMessage('Error', 'El nickname debe tener al menos 3 caracteres');
+                return;
+            }
+            
+            if (nickname.length > 20) {
+                showMessage('Error', 'El nickname no puede tener más de 20 caracteres');
+                return;
+            }
+            
+            gameStats.playerName = nickname;
+            gameStats.hasNickname = true;
+            saveStats();
+            
+            const modal = document.getElementById('nickname-modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+            
+            showMessage('¡Bienvenido!', `Hola ${nickname}, ¡prepárate para la batalla!`, 2000);
+        }
+
         // ============================
         // MANEJO DE PANTALLAS
         // ============================
         function showScreen(screenName) {
-            const screens = ['loading-screen', 'main-menu', 'character-select', 'editor-screen', 'game-screen'];
+            const screens = ['start-screen', 'main-menu', 'character-select', 'editor-screen', 'game-screen'];
             screens.forEach(screen => {
                 const element = document.getElementById(screen);
                 if (element) {
@@ -3466,8 +3698,8 @@
 
             const targetScreen = document.getElementById(screenName);
             if (targetScreen) {
-                targetScreen.style.display = screenName === 'loading-screen' ? 'flex' : 'block';
-                if (screenName !== 'loading-screen' && screenName !== 'video-intro') {
+                targetScreen.style.display = screenName === 'start-screen' ? 'flex' : 'block';
+                if (screenName !== 'start-screen' && screenName !== 'video-intro') {
                     targetScreen.classList.add('screen-active');
                 }
             }
@@ -3506,8 +3738,11 @@
                 return;
             }
             
-            if (!gameStats.nicknameSet) {
-                showNicknameModal();
+            if (savedLevels.length === 0) {
+                showMessage('No hay niveles', 
+                    'No hay niveles creados. Ve al Modo Cerebro para crear tu primer nivel.',
+                    3000);
+                showScreen('editor-screen');
                 return;
             }
             
@@ -3639,6 +3874,8 @@
             
             board.innerHTML = '';
             board.style.gridTemplateColumns = `repeat(${editorState.width}, 40px)`;
+            board.style.width = `${editorState.width * 40}px`;
+            board.style.height = `${editorState.height * 40}px`;
 
             for (let y = 0; y < editorState.height; y++) {
                 for (let x = 0; x < editorState.width; x++) {
@@ -3647,14 +3884,13 @@
                     const image = TILE_IMAGES[tileType];
 
                     const cell = document.createElement('div');
-                    cell.className = `game-cell ${tileType === TILE_TYPES.EMPTY ? 'cell-empty' : ''}`;
+                    cell.className = `editor-cell ${tileType === TILE_TYPES.EMPTY ? 'cell-empty' : ''}`;
                     
                     if (image && tileType !== TILE_TYPES.EMPTY) {
                         cell.style.backgroundImage = `url('${image}')`;
                         // Hacer la moneda más grande
                         if (tileType === TILE_TYPES.COIN) {
                             cell.style.backgroundSize = 'cover';
-                            cell.style.transform = 'scale(1.2)';
                         }
                     }
 
@@ -3693,7 +3929,7 @@
                 height: 10,
                 name: 'Mi Nivel Personalizado',
                 timeLimit: 120,
-                levelNumber: 1,
+                levelNumber: savedLevels.length > 0 ? Math.max(...savedLevels.map(l => l.levelNumber)) + 1 : 1,
                 levelType: 'custom',
                 editingExisting: false,
                 editingLevelIndex: -1
@@ -3707,7 +3943,7 @@
             if (boardSize) boardSize.value = '10';
             if (editorTime) editorTime.value = '120';
             if (levelNameInput) levelNameInput.value = 'Mi Nivel Personalizado';
-            if (levelNumberInput) levelNumberInput.value = '1';
+            if (levelNumberInput) levelNumberInput.value = editorState.levelNumber.toString();
             
             loadEditor();
         }
@@ -3753,26 +3989,13 @@
                 grid: [...editorState.grid]
             };
 
-            // Verificar si ya existe un nivel con el mismo nombre o número
-            const duplicateName = savedLevels.find(level => 
-                level.name === newLevel.name && 
-                !(editorState.editingExisting && editorState.editingLevelIndex >= 0 && 
-                  savedLevels[editorState.editingLevelIndex].name === newLevel.name)
+            // Verificar si ya existe un nivel con el mismo nombre
+            const existingIndex = savedLevels.findIndex(level => 
+                level.name === newLevel.name && level.levelNumber === newLevel.levelNumber
             );
             
-            const duplicateNumber = savedLevels.find(level => 
-                level.levelNumber === newLevel.levelNumber && 
-                !(editorState.editingExisting && editorState.editingLevelIndex >= 0 && 
-                  savedLevels[editorState.editingLevelIndex].levelNumber === newLevel.levelNumber)
-            );
-            
-            if (duplicateName) {
-                showMessage('Error', 'Ya existe un nivel con ese nombre. Usa un nombre diferente.');
-                return;
-            }
-            
-            if (duplicateNumber) {
-                showMessage('Error', 'Ya existe un nivel con ese número. Usa un número diferente.');
+            if (existingIndex !== -1 && !editorState.editingExisting) {
+                showMessage('Error', 'Ya existe un nivel con este nombre y número');
                 return;
             }
 
@@ -3790,6 +4013,41 @@
             editorState.editingLevelIndex = -1;
         }
 
+        function playCurrentLevel() {
+            if (editorState.grid.length === 0) {
+                showMessage('Error', 'Primero debes crear un nivel');
+                return;
+            }
+            
+            const hasStart = editorState.grid.some(tile => tile === TILE_TYPES.START);
+            const hasExit = editorState.grid.some(tile => tile === TILE_TYPES.EXIT || tile === TILE_TYPES.DOOR);
+            
+            if (!hasStart) {
+                showMessage('Error', 'Debes colocar al menos una entrada (START) en el nivel');
+                return;
+            }
+            
+            if (!hasExit) {
+                showMessage('Error', 'Debes colocar al menos una salida (EXIT o DOOR) en el nivel');
+                return;
+            }
+            
+            // Guardar temporalmente el nivel actual del editor
+            const tempLevel = {
+                name: editorState.name,
+                width: editorState.width,
+                height: editorState.height,
+                timeLimit: editorState.timeLimit,
+                levelNumber: editorState.levelNumber,
+                levelType: editorState.levelType,
+                grid: [...editorState.grid]
+            };
+            
+            currentLevel = tempLevel;
+            currentLevelIndex = -1; // Indica que es un nivel temporal
+            showScreen('game-screen');
+        }
+
         function loadLevelsModal() {
             const levelsModal = document.getElementById('levels-modal');
             const levelsList = document.getElementById('levels-list');
@@ -3798,23 +4056,26 @@
             
             levelsList.innerHTML = '';
             
-            savedLevels.forEach((level, index) => {
+            savedLevels.sort((a, b) => a.levelNumber - b.levelNumber).forEach((level, index) => {
                 const levelItem = document.createElement('div');
                 levelItem.className = 'level-item';
                 levelItem.innerHTML = `
-                    <div>
+                    <div class="level-info">
                         <h3 style="color: var(--accent); margin-bottom: 0.5rem;">${level.name}</h3>
                         <p style="color: #94a3b8; font-size: 0.9rem;">
+                            Nivel: ${level.levelNumber} | 
                             Tamaño: ${level.width}x${level.height} | 
-                            Tiempo: ${level.timeLimit}s | 
-                            Tipo: ${level.levelType === 'ai' ? 'IA' : 'Personalizado'}
+                            Tiempo: ${level.timeLimit}s
                         </p>
                     </div>
                     <div class="level-actions">
-                        <button class="level-action-btn edit" onclick="editLevel(${index})">
+                        <button class="level-action-btn" onclick="playLevel(${index})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="level-action-btn" onclick="editLevel(${index})">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="level-action-btn" onclick="deleteLevel(${index})">
+                        <button class="level-action-btn delete" onclick="deleteLevel(${index})">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -3830,24 +4091,6 @@
             levelsModal.classList.add('active');
         }
 
-        function editLevel(index) {
-            if (index < 0 || index >= savedLevels.length) return;
-            
-            loadLevelIntoEditor(index);
-            hideMessage();
-        }
-
-        function deleteLevel(index) {
-            if (index < 0 || index >= savedLevels.length) return;
-            
-            if (confirm('¿Estás seguro de que quieres eliminar este nivel?')) {
-                savedLevels.splice(index, 1);
-                localStorage.setItem('sandboxLevels', JSON.stringify(savedLevels));
-                loadLevelsModal();
-                showMessage('¡Nivel Eliminado!', 'El nivel ha sido eliminado correctamente.', 2000);
-            }
-        }
-
         function filterLevels(type) {
             const filterBtns = document.querySelectorAll('.filter-btn');
             filterBtns.forEach(btn => btn.classList.remove('active'));
@@ -3856,20 +4099,60 @@
             const levelsList = document.getElementById('levels-list');
             if (!levelsList) return;
             
-            const levelItems = levelsList.querySelectorAll('.level-item');
-            levelItems.forEach(item => {
-                const levelTypeText = item.querySelector('p').textContent;
-                if (type === 'all') {
-                    item.style.display = 'flex';
-                } else if (type === 'ai') {
-                    item.style.display = levelTypeText.includes('IA') ? 'flex' : 'none';
-                } else if (type === 'custom') {
-                    item.style.display = levelTypeText.includes('Personalizado') ? 'flex' : 'none';
-                }
+            levelsList.innerHTML = '';
+            
+            let filteredLevels = savedLevels;
+            if (type === 'custom') {
+                filteredLevels = savedLevels.filter(level => level.levelType === 'custom');
+            }
+            
+            filteredLevels.sort((a, b) => a.levelNumber - b.levelNumber).forEach((level, index) => {
+                const originalIndex = savedLevels.findIndex(l => 
+                    l.name === level.name && l.levelNumber === level.levelNumber
+                );
+                
+                const levelItem = document.createElement('div');
+                levelItem.className = 'level-item';
+                levelItem.innerHTML = `
+                    <div class="level-info">
+                        <h3 style="color: var(--accent); margin-bottom: 0.5rem;">${level.name}</h3>
+                        <p style="color: #94a3b8; font-size: 0.9rem;">
+                            Nivel: ${level.levelNumber} | 
+                            Tamaño: ${level.width}x${level.height} | 
+                            Tiempo: ${level.timeLimit}s
+                        </p>
+                    </div>
+                    <div class="level-actions">
+                        <button class="level-action-btn" onclick="playLevel(${originalIndex})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="level-action-btn" onclick="editLevel(${originalIndex})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="level-action-btn delete" onclick="deleteLevel(${originalIndex})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                levelsList.appendChild(levelItem);
             });
+            
+            if (filteredLevels.length === 0) {
+                levelsList.innerHTML = '<p style="text-align: center; color: #94a3b8;">No hay niveles guardados</p>';
+            }
         }
 
-        function loadLevelIntoEditor(index) {
+        function playLevel(index) {
+            if (index < 0 || index >= savedLevels.length) return;
+            
+            currentLevelIndex = index;
+            currentLevel = savedLevels[index];
+            hideMessage();
+            showScreen('game-screen');
+        }
+
+        function editLevel(index) {
             if (index < 0 || index >= savedLevels.length) return;
             
             const level = savedLevels[index];
@@ -3897,7 +4180,20 @@
             if (levelNameInput) levelNameInput.value = level.name;
             if (levelNumberInput) levelNumberInput.value = level.levelNumber.toString();
             
-            loadEditor();
+            hideMessage();
+            showScreen('editor-screen');
+        }
+
+        function deleteLevel(index) {
+            if (index < 0 || index >= savedLevels.length) return;
+            
+            const levelName = savedLevels[index].name;
+            if (confirm(`¿Estás seguro de que quieres eliminar el nivel "${levelName}"?`)) {
+                savedLevels.splice(index, 1);
+                localStorage.setItem('sandboxLevels', JSON.stringify(savedLevels));
+                loadLevelsModal();
+                showMessage('Nivel Eliminado', `El nivel "${levelName}" ha sido eliminado.`, 2000);
+            }
         }
 
         // ============================
@@ -3905,6 +4201,11 @@
         // ============================
         function startGame() {
             if (!currentLevel) {
+                if (savedLevels.length === 0) {
+                    showMessage('Error', 'No hay niveles creados. Ve al Modo Cerebro para crear tu primer nivel.');
+                    showScreen('editor-screen');
+                    return;
+                }
                 currentLevel = savedLevels[currentLevelIndex];
             }
 
@@ -3925,6 +4226,7 @@
                 zombies: findZombies(),
                 zombieRambos: findZombieRambos(),
                 portals: findPortals(),
+                boxes: findBoxes(),
                 lives: 20,
                 time: currentLevel.timeLimit,
                 ammo: 0,
@@ -3954,17 +4256,19 @@
                 joystickActive: false,
                 joystickDirection: { x: 0, y: 0 },
                 joystickVelocity: { x: 0, y: 0 },
-                zoomLevel: 2.0, // Zoom inicial más cerca
+                zoomLevel: 2.0, // ZOOM INICIAL MÁS CERCANO
                 cameraX: 0,
                 cameraY: 0,
                 lastWaterDamageTime: Date.now(),
-                waterDamageInterval: 3000
+                waterDamageInterval: 3000,
+                boxFallTimer: null
             };
 
             updateHUD();
             updateHealthBar();
             renderGameGrid();
             updateCameraPosition();
+            updateScrollThumb();
 
             const currentLevelEl = document.getElementById('current-level');
             const characterNameEl = document.getElementById('character-name');
@@ -3979,23 +4283,22 @@
                 }
             }
 
+            // Limpiar timers anteriores
             if (gameState.timer) clearInterval(gameState.timer);
-            gameState.timer = setInterval(gameLoop, 1000);
-
             if (gameState.zombieTimer) clearInterval(gameState.zombieTimer);
-            gameState.zombieTimer = setInterval(moveZombies, 2000);
-
             if (gameState.zombieRamboTimer) clearInterval(gameState.zombieRamboTimer);
-            gameState.zombieRamboTimer = setInterval(moveZombieRambos, 1500);
-
             if (gameState.waterTimer) clearInterval(gameState.waterTimer);
-            gameState.waterTimer = setInterval(checkWaterDamage, 1000);
-
             if (gameState.bombTimer) clearInterval(gameState.bombTimer);
-            gameState.bombTimer = setInterval(updateBombs, 1000);
-
             if (gameState.exitTimer) clearInterval(gameState.exitTimer);
+            if (gameState.boxFallTimer) clearInterval(gameState.boxFallTimer);
+
+            gameState.timer = setInterval(gameLoop, 1000);
+            gameState.zombieTimer = setInterval(moveZombies, 4000); // ZOMBIES MÁS LENTOS (EL DOBLE DE TIEMPO)
+            gameState.zombieRamboTimer = setInterval(moveZombieRambos, 3000); // ZOMBIE RAMBOS MÁS LENTOS
+            gameState.waterTimer = setInterval(checkWaterDamage, 1000);
+            gameState.bombTimer = setInterval(updateBombs, 1000);
             gameState.exitTimer = setInterval(updateExitTimer, 1000);
+            gameState.boxFallTimer = setInterval(applyBoxGravity, 2000); // GRAVEDAD DE CAJAS CADA 2 SEGUNDOS
         }
 
         function findStartPosition() {
@@ -4021,7 +4324,7 @@
                         id: zombies.length,
                         image: 'zombie.png',
                         lastMoveDirection: null,
-                        speed: 0.5
+                        speed: 0.25 // LA MITAD DE RÁPIDO
                     });
                 }
             }
@@ -4038,9 +4341,9 @@
                         id: zombieRambos.length,
                         image: 'zombierambo.png',
                         lastMoveDirection: null,
-                        speed: 0.8,
+                        speed: 0.4, // LA MITAD DE RÁPIDO
                         lastShotTime: 0,
-                        shotCooldown: 3000 // 3 segundos entre disparos
+                        shotCooldown: 6000 // 6 segundos entre disparos (EL DOBLE)
                     });
                 }
             }
@@ -4061,12 +4364,57 @@
             return portals;
         }
 
+        function findBoxes() {
+            const boxes = [];
+            for (let i = 0; i < gameState.grid.length; i++) {
+                if (gameState.grid[i] === TILE_TYPES.BOX) {
+                    boxes.push({
+                        x: i % gameState.width,
+                        y: Math.floor(i / gameState.width),
+                        index: i
+                    });
+                }
+            }
+            return boxes;
+        }
+
+        function applyBoxGravity() {
+            if (!gameState.playing || gameState.paused) return;
+            
+            let needsUpdate = false;
+            
+            // Ordenar cajas de abajo hacia arriba para evitar conflictos
+            gameState.boxes.sort((a, b) => b.y - a.y);
+            
+            gameState.boxes.forEach(box => {
+                const belowIndex = (box.y + 1) * gameState.width + box.x;
+                
+                // Verificar si hay espacio debajo
+                if (box.y + 1 < gameState.height && 
+                    gameState.grid[belowIndex] === TILE_TYPES.EMPTY) {
+                    
+                    // Mover la caja hacia abajo
+                    gameState.grid[box.index] = TILE_TYPES.EMPTY;
+                    box.y++;
+                    box.index = belowIndex;
+                    gameState.grid[belowIndex] = TILE_TYPES.BOX;
+                    needsUpdate = true;
+                }
+            });
+            
+            if (needsUpdate) {
+                renderGameGrid();
+            }
+        }
+
         function renderGameGrid() {
             const board = document.getElementById('game-board');
             if (!board) return;
             
             board.innerHTML = '';
-            board.style.gridTemplateColumns = `repeat(${gameState.width}, 40px)`;
+            board.style.gridTemplateColumns = `repeat(${gameState.width}, 50px)`;
+            board.style.width = `${gameState.width * 50}px`;
+            board.style.height = `${gameState.height * 50}px`;
 
             for (let y = 0; y < gameState.height; y++) {
                 for (let x = 0; x < gameState.width; x++) {
@@ -4083,7 +4431,6 @@
                         // Hacer la moneda más grande
                         if (tileType === TILE_TYPES.COIN) {
                             cell.style.backgroundSize = 'cover';
-                            cell.style.transform = 'scale(1.2)';
                         }
                     }
 
@@ -4287,7 +4634,7 @@
                     moveY = dir[1];
                 }
 
-                // Aplicar velocidad del zombie
+                // Aplicar velocidad del zombie (MÁS LENTO)
                 if (Math.random() < zombie.speed) {
                     let newX = zombie.x + moveX;
                     let newY = zombie.y + moveY;
@@ -4339,7 +4686,7 @@
                     moveY = dir[1];
                 }
 
-                // Aplicar velocidad del zombie rambo (más rápido)
+                // Aplicar velocidad del zombie rambo (MÁS LENTO)
                 if (Math.random() < zombie.speed) {
                     let newX = zombie.x + moveX;
                     let newY = zombie.y + moveY;
@@ -4429,7 +4776,7 @@
         }
 
         function handlePlayerHit(zombie) {
-            const damage = zombie ? (zombie.speed === 0.8 ? 20 : 10) : 10;
+            const damage = zombie ? (zombie.speed === 0.4 ? 20 : 10) : 10;
             applyDamage(damage);
         }
 
@@ -4482,6 +4829,8 @@
                     // Dejar la caja
                     gameState.grid[newIndex] = TILE_TYPES.BOX;
                     gameState.player.carryingBox = false;
+                    // Actualizar lista de cajas
+                    gameState.boxes = findBoxes();
                 } else {
                     // Recoger la caja si está vacío el siguiente espacio
                     const nextX = newX + dx;
@@ -4493,6 +4842,8 @@
                             gameState.grid[newIndex] = TILE_TYPES.EMPTY;
                             gameState.grid[nextIndex] = TILE_TYPES.BOX;
                             gameState.player.carryingBox = true;
+                            // Actualizar lista de cajas
+                            gameState.boxes = findBoxes();
                         }
                     }
                 }
@@ -4522,6 +4873,7 @@
             renderGameGrid();
             updateCameraPosition();
             updateHUD();
+            updateScrollThumb();
             checkZombieCollision();
         }
 
@@ -4689,6 +5041,10 @@
                     
                     if ([TILE_TYPES.BOX, TILE_TYPES.CACTUS, TILE_TYPES.GRASS].includes(tile)) {
                         gameState.grid[index] = TILE_TYPES.EMPTY;
+                        // Actualizar lista de cajas si se destruyó una
+                        if (tile === TILE_TYPES.BOX) {
+                            gameState.boxes = findBoxes();
+                        }
                         break;
                     }
                     
@@ -4733,6 +5089,10 @@
                         
                         if ([TILE_TYPES.BOX, TILE_TYPES.CACTUS, TILE_TYPES.GRASS].includes(tile)) {
                             gameState.grid[index] = TILE_TYPES.EMPTY;
+                            // Actualizar lista de cajas si se destruyó una
+                            if (tile === TILE_TYPES.BOX) {
+                                gameState.boxes = findBoxes();
+                            }
                         }
                         
                         const zombieIndex = gameState.zombies.findIndex(z => z.x === x && z.y === y);
@@ -4772,6 +5132,10 @@
                     
                     if ([TILE_TYPES.BOX, TILE_TYPES.CACTUS, TILE_TYPES.GRASS].includes(tile)) {
                         gameState.grid[index] = TILE_TYPES.EMPTY;
+                        // Actualizar lista de cajas si se destruyó una
+                        if (tile === TILE_TYPES.BOX) {
+                            gameState.boxes = findBoxes();
+                        }
                     }
                     
                     const zombieIndex = gameState.zombies.findIndex(z => z.x === x && z.y === y);
@@ -4877,6 +5241,8 @@
                 }
             }
             
+            // Actualizar lista de cajas
+            gameState.boxes = findBoxes();
             renderGameGrid();
         }
 
@@ -4947,6 +5313,7 @@
             if (gameState.waterTimer) clearInterval(gameState.waterTimer);
             if (gameState.bombTimer) clearInterval(gameState.bombTimer);
             if (gameState.exitTimer) clearInterval(gameState.exitTimer);
+            if (gameState.boxFallTimer) clearInterval(gameState.boxFallTimer);
             
             if (shootInterval) {
                 clearInterval(shootInterval);
@@ -4958,26 +5325,23 @@
                 const coinsEarned = 10 + (currentLevelIndex + 1) * 5;
                 gameStats.playerCoins += coinsEarned;
                 
-                currentLevelIndex++;
-                
-                const progress = {
-                    currentLevel: currentLevelIndex + 1,
-                    totalLevels: gameStats.totalLevels,
-                    playerCoins: gameStats.playerCoins
-                };
-                localStorage.setItem('sandboxProgress', JSON.stringify(progress));
+                // Solo avanzar de nivel si no es un nivel temporal del editor
+                if (currentLevelIndex !== -1) {
+                    currentLevelIndex++;
+                    
+                    const progress = {
+                        currentLevel: currentLevelIndex + 1,
+                        totalLevels: gameStats.totalLevels,
+                        playerCoins: gameStats.playerCoins
+                    };
+                    localStorage.setItem('sandboxProgress', JSON.stringify(progress));
+                }
                 
                 saveStats();
                 
-                // Enviar highscore a Firebase
-                if (gameStats.playerName) {
-                    submitHighscore({
-                        playerName: gameStats.playerName,
-                        character: selectedCharacter.name,
-                        level: currentLevelIndex,
-                        score: gameState.coins
-                    });
-                }
+                // Enviar highscore
+                const score = gameState.coins * 100 + gameState.time * 10;
+                submitHighscore(score, currentLevel ? currentLevel.levelNumber : 1, selectedCharacter.name);
             }
 
             showMessage(
@@ -4991,11 +5355,12 @@
                 messageButton.onclick = () => {
                     hideMessage();
                     if (won) {
-                        if (currentLevelIndex < savedLevels.length) {
+                        if (currentLevelIndex !== -1 && currentLevelIndex < savedLevels.length) {
                             currentLevel = savedLevels[currentLevelIndex];
                             startGame();
                         } else {
-                            showMessage('¡Felicidades!', 'Has completado todos los niveles. ¡Eres un héroe!', 3000);
+                            // Si es un nivel temporal o no hay más niveles, volver al menú
+                            showMessage('¡Felicidades!', 'Has completado el nivel. ¡Eres un héroe!', 3000);
                             setTimeout(() => showScreen('main-menu'), 3000);
                         }
                     } else {
@@ -5084,56 +5449,16 @@
         }
 
         // ============================
-        // CREACIÓN DE NIVELES POR DEFECTO
-        // ============================
-        function createDefaultLevels() {
-            savedLevels = [];
-            
-            const level1 = createEmptyGrid(10, 10);
-            for (let i = 0; i < 10; i++) {
-                level1[i] = TILE_TYPES.WALL;
-                level1[90 + i] = TILE_TYPES.WALL;
-                level1[i * 10] = TILE_TYPES.WALL;
-                level1[i * 10 + 9] = TILE_TYPES.WALL;
-            }
-            level1[11] = TILE_TYPES.START;
-            level1[88] = TILE_TYPES.DOOR;
-            level1[44] = TILE_TYPES.ZOMBIE;
-            level1[25] = TILE_TYPES.RIFLE;
-            level1[65] = TILE_TYPES.COIN;
-            
-            savedLevels.push({
-                name: 'Nivel 1 - El Comienzo',
-                width: 10,
-                height: 10,
-                timeLimit: 120,
-                levelNumber: 1,
-                levelType: 'ai',
-                grid: level1
-            });
-
-            localStorage.setItem('sandboxLevels', JSON.stringify(savedLevels));
-        }
-
-        function createEmptyGrid(width, height) {
-            return Array(width * height).fill(TILE_TYPES.EMPTY);
-        }
-
-        // ============================
         // SISTEMA DE CLICS EN EL TÍTULO
         // ============================
         let titleClickCount = 0;
-        let hiddenMenuVisible = false;
         
         function countTitleClicks() {
             titleClickCount++;
             
-            if (titleClickCount >= 7 && !hiddenMenuVisible) {
-                hiddenMenuVisible = true;
-                const hiddenMenu = document.getElementById('hidden-menu-options');
-                if (hiddenMenu) {
-                    hiddenMenu.classList.remove('hidden');
-                }
+            if (titleClickCount >= 10) {
+                showMessage('¡Easter Egg!', 'Has encontrado un secreto. ¡Sigue así!', 2000);
+                titleClickCount = 0;
             }
         }
     </script>
