@@ -824,19 +824,20 @@
             z-index: 1;
             touch-action: pinch-zoom pan-x pan-y;
             background: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .game-board {
             display: grid;
             gap: 0px;
             background: rgba(0, 0, 0, 0.3);
-            position: absolute;
-            transform-origin: 0 0;
+            position: relative;
             transition: transform 0.1s ease;
             justify-content: center;
             align-content: center;
-            width: 100%;
-            height: 100%;
+            touch-action: none;
         }
 
         @media (max-width: 768px) {
@@ -900,6 +901,28 @@
         .cell-palanca { background-color: #7c2d12; }
         .cell-vacuna { background-color: #10b981; }
         .cell-zombierambo { background-color: #450a0a; }
+
+        /* Proyectil */
+        .projectile {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(135deg, #fbbf24, #dc2626);
+            border-radius: 50%;
+            z-index: 50;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+            animation: projectileMove 0.3s linear forwards;
+        }
+
+        @keyframes projectileMove {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
 
         .player-cell {
             position: relative;
@@ -2598,7 +2621,7 @@
             carouselCurrentX: 0,
             isDraggingCarousel: false,
             // Variables para zoom y cámara
-            zoomLevel: 2.0, // ZOOM INICIAL MÁS CERCANO
+            zoomLevel: 1.0,
             cameraX: 0,
             cameraY: 0,
             // Variables para agua
@@ -2606,7 +2629,11 @@
             waterDamageInterval: 3000, // 3 segundos
             // Variables para gravedad de cajas
             boxes: [],
-            boxFallTimer: null
+            boxFallTimer: null,
+            // Variable para delay de movimiento
+            canMove: true,
+            // Variable para ver si Rambo tiene rifle
+            ramboHasRifle: false
         };
 
         let editorState = {
@@ -2753,7 +2780,7 @@
         }
 
         // ============================
-        // SISTEMA DE ZOOM Y CÁMARA
+        // SISTEMA DE ZOOM Y CÁMARA - CORREGIDO
         // ============================
         function setupZoomControls() {
             const gameBoardContainer = document.getElementById('game-board-container');
@@ -2836,34 +2863,44 @@
             const gameBoard = document.getElementById('game-board');
             if (!gameBoard) return;
 
-            // Aplicar zoom
-            gameBoard.style.transform = `scale(${gameState.zoomLevel})`;
+            // Calcular tamaño del tablero
+            const cellSize = 50;
+            const boardWidth = gameState.width * cellSize;
+            const boardHeight = gameState.height * cellSize;
             
-            // Centrar en el jugador
+            // Calcular tamaño del contenedor
             const container = document.getElementById('game-board-container');
             if (!container) return;
-
+            
             const containerRect = container.getBoundingClientRect();
-            const cellSize = 50; // Tamaño de celda base ajustado
+            const containerWidth = containerRect.width;
+            const containerHeight = containerRect.height;
             
-            // Calcular posición del jugador en píxeles
-            const playerPixelX = gameState.player.x * cellSize * gameState.zoomLevel;
-            const playerPixelY = gameState.player.y * cellSize * gameState.zoomLevel;
+            // Calcular zoom para que el tablero quepa en pantalla
+            const scaleX = containerWidth / boardWidth;
+            const scaleY = containerHeight / boardHeight;
+            const minScale = Math.min(scaleX, scaleY, 1.0);
             
-            // Calcular desplazamiento para centrar al jugador
-            gameState.cameraX = containerRect.width / 2 - playerPixelX;
-            gameState.cameraY = containerRect.height / 2 - playerPixelY;
+            // Aplicar zoom si es necesario
+            if (gameState.zoomLevel === 1.0) {
+                gameState.zoomLevel = minScale;
+            }
             
-            // Limitar la cámara para que no se salga del tablero
-            const boardWidth = gameState.width * cellSize * gameState.zoomLevel;
-            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
+            // Aplicar transformación de escala
+            const scale = gameState.zoomLevel;
+            gameBoard.style.transform = `scale(${scale})`;
             
-            gameState.cameraX = Math.max(containerRect.width - boardWidth, Math.min(0, gameState.cameraX));
-            gameState.cameraY = Math.max(containerRect.height - boardHeight, Math.min(0, gameState.cameraY));
+            // Calcular posición centrada
+            const scaledWidth = boardWidth * scale;
+            const scaledHeight = boardHeight * scale;
             
-            // Aplicar transformación de cámara
-            gameBoard.style.left = `${gameState.cameraX}px`;
-            gameBoard.style.top = `${gameState.cameraY}px`;
+            // Centrar el tablero
+            const left = (containerWidth - scaledWidth) / 2;
+            const top = (containerHeight - scaledHeight) / 2;
+            
+            gameBoard.style.left = `${left}px`;
+            gameBoard.style.top = `${top}px`;
+            gameBoard.style.position = 'absolute';
         }
 
         function updateZoomDisplay() {
@@ -2961,57 +2998,37 @@
         }
 
         function scrollUp() {
-            const container = document.getElementById('game-board-container');
-            if (!container) return;
+            const gameBoard = document.getElementById('game-board');
+            if (!gameBoard) return;
             
-            const cellSize = 50;
-            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
-            const containerHeight = container.clientHeight;
-            
-            if (boardHeight > containerHeight) {
-                gameState.cameraY = Math.min(0, gameState.cameraY + 100);
-                const gameBoard = document.getElementById('game-board');
-                if (gameBoard) {
-                    gameBoard.style.top = `${gameState.cameraY}px`;
-                }
-                updateScrollThumb();
-            }
+            const currentTop = parseInt(gameBoard.style.top) || 0;
+            gameBoard.style.top = `${currentTop + 50}px`;
+            updateScrollThumb();
         }
 
         function scrollDown() {
-            const container = document.getElementById('game-board-container');
-            if (!container) return;
+            const gameBoard = document.getElementById('game-board');
+            if (!gameBoard) return;
             
-            const cellSize = 50;
-            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
-            const containerHeight = container.clientHeight;
-            
-            if (boardHeight > containerHeight) {
-                gameState.cameraY = Math.max(containerHeight - boardHeight, gameState.cameraY - 100);
-                const gameBoard = document.getElementById('game-board');
-                if (gameBoard) {
-                    gameBoard.style.top = `${gameState.cameraY}px`;
-                }
-                updateScrollThumb();
-            }
+            const currentTop = parseInt(gameBoard.style.top) || 0;
+            gameBoard.style.top = `${currentTop - 50}px`;
+            updateScrollThumb();
         }
 
         function updateCameraFromScroll(scrollPercentage) {
+            const gameBoard = document.getElementById('game-board');
+            if (!gameBoard) return;
+            
             const container = document.getElementById('game-board-container');
             if (!container) return;
             
-            const cellSize = 50;
-            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
-            const containerHeight = container.clientHeight;
+            const containerRect = container.getBoundingClientRect();
+            const boardHeight = gameState.height * 50 * gameState.zoomLevel;
+            const maxScroll = Math.max(0, boardHeight - containerRect.height);
             
-            if (boardHeight > containerHeight) {
-                const maxScroll = containerHeight - boardHeight;
-                gameState.cameraY = maxScroll * scrollPercentage;
-                
-                const gameBoard = document.getElementById('game-board');
-                if (gameBoard) {
-                    gameBoard.style.top = `${gameState.cameraY}px`;
-                }
+            if (maxScroll > 0) {
+                const newTop = -maxScroll * scrollPercentage;
+                gameBoard.style.top = `${newTop}px`;
             }
         }
 
@@ -3021,17 +3038,19 @@
             
             if (!scrollThumb || !scrollTrack) return;
             
+            const gameBoard = document.getElementById('game-board');
             const container = document.getElementById('game-board-container');
-            if (!container) return;
             
-            const cellSize = 50;
-            const boardHeight = gameState.height * cellSize * gameState.zoomLevel;
-            const containerHeight = container.clientHeight;
+            if (!gameBoard || !container) return;
             
-            if (boardHeight > containerHeight) {
+            const containerRect = container.getBoundingClientRect();
+            const boardHeight = gameState.height * 50 * gameState.zoomLevel;
+            const currentTop = parseInt(gameBoard.style.top) || 0;
+            
+            if (boardHeight > containerRect.height) {
                 const trackHeight = scrollTrack.clientHeight - scrollThumb.clientHeight;
-                const scrollRange = boardHeight - containerHeight;
-                const currentScroll = -gameState.cameraY;
+                const scrollRange = boardHeight - containerRect.height;
+                const currentScroll = Math.abs(currentTop);
                 const thumbPosition = (currentScroll / scrollRange) * trackHeight;
                 
                 scrollThumb.style.top = `${Math.max(0, Math.min(trackHeight, thumbPosition))}px`;
@@ -3431,6 +3450,39 @@
         }
 
         // ============================
+        // SISTEMA DE RIFLE PARA RAMBO
+        // ============================
+        function upgradeRamboToRifle() {
+            if (selectedCharacter.id === 'rambo' && !gameState.ramboHasRifle) {
+                // Verificar si tiene suficientes monedas (50 monedas para el rifle)
+                if (gameStats.playerCoins >= 50) {
+                    gameStats.playerCoins -= 50;
+                    saveStats();
+                    updateCoinsDisplay();
+                    
+                    // Cambiar a Rambo Rifle
+                    selectedCharacter = CHARACTERS.find(c => c.id === 'ramborifle');
+                    gameState.ramboHasRifle = true;
+                    
+                    // Configurar rifle ilimitado con 50 balas
+                    gameState.shots = 50;
+                    gameState.maxShots = 50;
+                    gameState.weaponType = 'rifle';
+                    
+                    showMessage('¡Rambo Mejorado!', 
+                        '¡Has equipado a Rambo con un rifle automático! Ahora tiene 50 balas infinitas.', 
+                        3000);
+                    
+                    updateHUD();
+                } else {
+                    showMessage('Monedas Insuficientes', 
+                        'Necesitas 50 monedas para comprar el rifle para Rambo.', 
+                        2000);
+                }
+            }
+        }
+
+        // ============================
         // CONTROLES TÁCTILES MEJORADOS
         // ============================
         function setupTouchControls() {
@@ -3742,6 +3794,13 @@
                     `¡${selectedCharacter.name} está bloqueado! Necesitas ${selectedCharacter.price} monedas.`,
                     3000);
                 return;
+            }
+            
+            // Si es Rambo, ofrecer comprar rifle
+            if (selectedCharacter.id === 'rambo' && !gameState.ramboHasRifle) {
+                if (confirm('¿Quieres comprar un rifle para Rambo por 50 monedas? Tendrá 50 balas infinitas.')) {
+                    upgradeRamboToRifle();
+                }
             }
             
             if (savedLevels.length === 0) {
@@ -4203,7 +4262,7 @@
         }
 
         // ============================
-        // JUEGO PRINCIPAL
+        // JUEGO PRINCIPAL - CON DELAY DE MOVIMIENTO
         // ============================
         function startGame() {
             if (!currentLevel) {
@@ -4262,13 +4321,22 @@
                 joystickActive: false,
                 joystickDirection: { x: 0, y: 0 },
                 joystickVelocity: { x: 0, y: 0 },
-                zoomLevel: 2.0, // ZOOM INICIAL MÁS CERCANO
+                zoomLevel: 1.0,
                 cameraX: 0,
                 cameraY: 0,
                 lastWaterDamageTime: Date.now(),
                 waterDamageInterval: 3000,
-                boxFallTimer: null
+                boxFallTimer: null,
+                canMove: true,
+                ramboHasRifle: gameState.ramboHasRifle
             };
+
+            // Configurar rifle para Rambo si está mejorado
+            if (selectedCharacter.id === 'ramborifle' || (selectedCharacter.id === 'rambo' && gameState.ramboHasRifle)) {
+                gameState.shots = 50;
+                gameState.maxShots = 50;
+                gameState.weaponType = 'rifle';
+            }
 
             updateHUD();
             updateHealthBar();
@@ -4797,8 +4865,11 @@
             }
         }
 
+        // ============================
+        // MOVIMIENTO CON DELAY DE 0.5 SEGUNDOS
+        // ============================
         function movePlayer(dx, dy) {
-            if (!gameState.playing || gameState.paused) return;
+            if (!gameState.playing || gameState.paused || !gameState.canMove) return;
 
             const newX = gameState.player.x + dx;
             const newY = gameState.player.y + dy;
@@ -4875,6 +4946,12 @@
 
             gameState.player.x = newX;
             gameState.player.y = newY;
+
+            // Aplicar delay de 0.5 segundos
+            gameState.canMove = false;
+            setTimeout(() => {
+                gameState.canMove = true;
+            }, 500);
 
             renderGameGrid();
             updateCameraPosition();
@@ -4994,6 +5071,9 @@
             }
         }
 
+        // ============================
+        // SISTEMA DE ATAQUE CON PROYECTILES VISIBLES
+        // ============================
         function attack() {
             if (!gameState.playing || gameState.paused) return;
             
@@ -5029,6 +5109,53 @@
             renderGameGrid();
         }
 
+        function createProjectile(startX, startY, endX, endY) {
+            const gameBoard = document.getElementById('game-board');
+            if (!gameBoard) return;
+            
+            const projectile = document.createElement('div');
+            projectile.className = 'projectile';
+            
+            // Calcular posiciones en píxeles
+            const startPixelX = startX * 50 + 25; // 25 es la mitad de 50px
+            const startPixelY = startY * 50 + 25;
+            const endPixelX = endX * 50 + 25;
+            const endPixelY = endY * 50 + 25;
+            
+            // Posicionar proyectil
+            projectile.style.left = `${startPixelX - 7.5}px`; // 7.5 es la mitad de 15px
+            projectile.style.top = `${startPixelY - 7.5}px`;
+            
+            // Calcular dirección y distancia
+            const dx = endPixelX - startPixelX;
+            const dy = endPixelY - startPixelY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Animación del proyectil
+            const duration = 300; // 0.3 segundos
+            const startTime = Date.now();
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentX = startPixelX + dx * progress;
+                const currentY = startPixelY + dy * progress;
+                
+                projectile.style.left = `${currentX - 7.5}px`;
+                projectile.style.top = `${currentY - 7.5}px`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    projectile.remove();
+                }
+            }
+            
+            gameBoard.appendChild(projectile);
+            requestAnimationFrame(animate);
+        }
+
         function rifleAttack() {
             const directions = [
                 {dx: 1, dy: 0},
@@ -5040,10 +5167,14 @@
             directions.forEach(dir => {
                 let x = gameState.player.x + dir.dx;
                 let y = gameState.player.y + dir.dy;
+                let hitSomething = false;
                 
-                while (x >= 0 && x < gameState.width && y >= 0 && y < gameState.height) {
+                while (x >= 0 && x < gameState.width && y >= 0 && y < gameState.height && !hitSomething) {
                     const index = y * gameState.width + x;
                     const tile = gameState.grid[index];
+                    
+                    // Crear proyectil
+                    createProjectile(gameState.player.x, gameState.player.y, x, y);
                     
                     if ([TILE_TYPES.BOX, TILE_TYPES.CACTUS, TILE_TYPES.GRASS].includes(tile)) {
                         gameState.grid[index] = TILE_TYPES.EMPTY;
@@ -5051,11 +5182,11 @@
                         if (tile === TILE_TYPES.BOX) {
                             gameState.boxes = findBoxes();
                         }
-                        break;
+                        hitSomething = true;
                     }
                     
                     if ([TILE_TYPES.WALL, TILE_TYPES.ROCK, TILE_TYPES.EXIT, TILE_TYPES.DOOR, TILE_TYPES.START].includes(tile)) {
-                        break;
+                        hitSomething = true;
                     }
                     
                     const zombieIndex = gameState.zombies.findIndex(z => z.x === x && z.y === y);
@@ -5063,7 +5194,7 @@
                         gameState.zombies.splice(zombieIndex, 1);
                         gameStats.totalZombies++;
                         saveStats();
-                        break;
+                        hitSomething = true;
                     }
                     
                     const zombieRamboIndex = gameState.zombieRambos.findIndex(z => z.x === x && z.y === y);
@@ -5071,7 +5202,7 @@
                         gameState.zombieRambos.splice(zombieRamboIndex, 1);
                         gameStats.totalZombies++;
                         saveStats();
-                        break;
+                        hitSomething = true;
                     }
                     
                     x += dir.dx;
@@ -5090,6 +5221,9 @@
                     const y = gameState.player.y + dy;
                     
                     if (x >= 0 && x < gameState.width && y >= 0 && y < gameState.height) {
+                        // Crear proyectil
+                        createProjectile(gameState.player.x, gameState.player.y, x, y);
+                        
                         const index = y * gameState.width + x;
                         const tile = gameState.grid[index];
                         
